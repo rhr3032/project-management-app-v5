@@ -3,7 +3,7 @@
 import { ProjectStatus, ProjectPriority, ProjectType } from '@/types';
 
 function StatusBadge({ status }: { status: ProjectStatus }) {
-  const colors: Record<ProjectStatus, { bg: string; text: string }> = {
+  const colors: Partial<Record<ProjectStatus, { bg: string; text: string }>> = {
     'Planning': { bg: 'bg-blue-100', text: 'text-blue-700' },
     'In Progress': { bg: 'bg-orange-100', text: 'text-orange-700' },
     'Review': { bg: 'bg-purple-100', text: 'text-purple-700' },
@@ -11,24 +11,24 @@ function StatusBadge({ status }: { status: ProjectStatus }) {
     'Completed': { bg: 'bg-green-100', text: 'text-green-700' },
   };
 
-  const { bg, text } = colors[status];
+  const { bg, text } = colors[status] || { bg: 'bg-gray-100', text: 'text-gray-700' };
   return <span className={`px-2 py-1 rounded text-xs font-medium ${bg} ${text}`}>{status}</span>;
 }
 
 function PriorityBadge({ priority }: { priority: ProjectPriority }) {
-  const colors: Record<ProjectPriority, { bg: string; text: string }> = {
+  const colors: Partial<Record<ProjectPriority, { bg: string; text: string }>> = {
     'Low': { bg: 'bg-blue-100', text: 'text-blue-700' },
     'Medium': { bg: 'bg-yellow-100', text: 'text-yellow-700' },
     'High': { bg: 'bg-orange-100', text: 'text-orange-700' },
     'Critical': { bg: 'bg-red-100', text: 'text-red-700' },
   };
 
-  const { bg, text } = colors[priority];
+  const { bg, text } = colors[priority] || { bg: 'bg-gray-100', text: 'text-gray-700' };
   return <span className={`px-2 py-1 rounded text-xs font-medium ${bg} ${text}`}>{priority}</span>;
 }
 
 function TypeBadge({ type }: { type: ProjectType }) {
-  const colors: Record<ProjectType, { bg: string; text: string }> = {
+  const colors: Partial<Record<ProjectType, { bg: string; text: string }>> = {
     'UI/UX Design': { bg: 'bg-pink-100', text: 'text-pink-700' },
     'Web App': { bg: 'bg-cyan-100', text: 'text-cyan-700' },
     'Mobile App': { bg: 'bg-purple-100', text: 'text-purple-700' },

@@ -222,4 +222,4 @@ For questions or issues, check:
 
 ## License
 
-Created with v0.app
+Created by Raisul R. [Portfolio](https://nuysrafi.vercel.app/)

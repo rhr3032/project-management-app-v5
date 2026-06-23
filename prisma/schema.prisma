@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Project {
+  id             String   @id @default(cuid())
+  name           String
+  description    String   @default("")
+  type           String
+  status         String
+  priority       String
+  effort         String
+  device         String   @default("")
+  owner          String
+  startDate      String   @default("")
+  endDate        String   @default("")
+  deadline       String   @default("")
+  clientName     String   @default("")
+  clientEmail    String   @default("")
+  clientPhone    String   @default("")
+  previewLink    String   @default("")
+  resourceLinks  Json     @default("[]")
+  shortOverview  String   @default("")
+  businessGoal   String   @default("")
+  targetAudience String   @default("")
+  competitors    String   @default("")
+  tags           Json     @default("[]")
+  company        String   @default("")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

@@ -1,171 +1,166 @@
-import { Project, DashboardStats, ProjectsByStatus, ProjectsByType } from '@/types';
+import type { Prisma, Project as PrismaProject } from '@prisma/client';
+import { DashboardStats, Project, ProjectsByStatus, ProjectsByType } from '@/types';
+import { getPrisma } from '@/lib/prisma';
 
-// Mock data - will be replaced with actual DB queries when DATABASE_URL is available
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    name: 'Mobile App Redesign',
-    description: 'Complete redesign of our mobile app interface',
-    type: 'UI/UX Design',
-    status: 'Review',
-    priority: 'Critical',
-    effort: 'M',
-    device: 'Mobile',
-    owner: 'Raisul R.',
-    startDate: '2026-06-15',
-    endDate: '2026-07-15',
-    deadline: '2026-07-15',
-    clientName: 'Vanguard Logistics Corp',
-    clientEmail: 'contact@vanguard.com',
-    clientPhone: '+1 (555) 123-4567',
-    previewLink: 'https://preview.yourproject.com',
-    resourceLinks: [{ url: 'https://figma.com/project', title: 'Figma Design' }],
-    shortOverview: 'A concise 1-2 sentence summary of what this project is and why it matters.',
-    businessGoal: 'Increase conversion by 20%.',
-    targetAudience: 'Primary users and stakeholders.',
-    competitors: 'Notion, Linear, Asana',
-    tags: ['design', 'mobile', 'core'],
-    company: 'Vanguard Logistics Corp',
-    createdAt: '2026-06-01',
-    updatedAt: '2026-06-23',
-  },
-  {
-    id: '2',
-    name: 'Website Optimization',
-    description: 'Performance and UX optimization for desktop',
-    type: 'Web App',
-    status: 'In Progress',
-    priority: 'High',
-    effort: 'L',
-    device: 'Desktop',
-    owner: 'Raisul',
-    startDate: '2026-06-22',
-    endDate: '2026-07-22',
-    deadline: '2026-07-22',
-    clientName: 'Vanguard Logistics Corp',
-    clientEmail: 'contact@vanguard.com',
-    clientPhone: '+1 (555) 987-6543',
-    previewLink: 'https://preview.yourproject.com',
-    resourceLinks: [{ url: 'https://github.com/repo', title: 'GitHub Repo' }],
-    shortOverview: 'A concise 1-2 sentence summary.',
-    businessGoal: 'Increase conversion by 20%.',
-    targetAudience: 'Primary users.',
-    competitors: 'Notion, Linear',
-    tags: ['web', 'optimization'],
-    company: 'Vanguard Logistics Corp',
-    createdAt: '2026-06-10',
-    updatedAt: '2026-06-23',
-  },
-  {
-    id: '3',
-    name: 'Brand Identity System',
-    description: 'Complete branding and design system creation',
-    type: 'Branding',
-    status: 'Planning',
-    priority: 'Medium',
-    effort: 'XL',
-    device: 'All',
-    owner: 'Jordan Lee',
-    startDate: '2026-06-24',
-    endDate: '2026-09-24',
-    deadline: '2026-09-24',
-    clientName: 'Tech Innovations Inc',
-    clientEmail: 'hello@techinnovations.com',
-    clientPhone: '+1 (555) 246-8135',
-    previewLink: 'https://preview.yourproject.com',
-    resourceLinks: [{ url: 'https://brand.guide', title: 'Brand Guide' }],
-    shortOverview: 'A concise summary.',
-    businessGoal: 'Establish strong brand presence.',
-    targetAudience: 'B2B and B2C customers.',
-    competitors: 'Notion, Linear, Asana',
-    tags: ['branding', 'design'],
-    company: 'Tech Innovations Inc',
-    createdAt: '2026-05-20',
-    updatedAt: '2026-06-23',
-  },
-];
+type ProjectInput = Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'type' | 'status' | 'priority' | 'effort' | 'device'> & {
+  type: string;
+  status: string;
+  priority: string;
+  effort: string;
+  device: string;
+};
+type ProjectUpdateInput = Partial<ProjectInput>;
+
+const dashboardStatuses = ['Planning', 'In Progress', 'Review', 'On Hold', 'Completed'];
+const dashboardTypes = ['UI/UX Design', 'Web App', 'Mobile App'];
+
+function toStringArray(value: Prisma.JsonValue): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+function toResourceLinks(value: Prisma.JsonValue): Project['resourceLinks'] {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((item): item is { url: string; title: string } => {
+      const link = item as Record<string, unknown>;
+      return (
+        typeof item === 'object' &&
+        item !== null &&
+        !Array.isArray(item) &&
+        typeof link.url === 'string' &&
+        typeof link.title === 'string'
+      );
+    })
+    .map((item) => ({ url: item.url, title: item.title }));
+}
+
+function toProject(project: PrismaProject): Project {
+  return {
+    ...project,
+    resourceLinks: toResourceLinks(project.resourceLinks),
+    tags: toStringArray(project.tags),
+    createdAt: project.createdAt.toISOString(),
+    updatedAt: project.updatedAt.toISOString(),
+  } as Project;
+}
+
+function toProjectCreateData(project: ProjectInput): Prisma.ProjectCreateInput {
+  return {
+    ...project,
+    resourceLinks: project.resourceLinks,
+    tags: project.tags,
+  };
+}
+
+function toProjectUpdateData(updates: ProjectUpdateInput): Prisma.ProjectUpdateInput {
+  const { resourceLinks, tags, ...rest } = updates;
+
+  return {
+    ...rest,
+    ...(resourceLinks ? { resourceLinks } : {}),
+    ...(tags ? { tags } : {}),
+  };
+}
 
 export async function getProjects(): Promise<Project[]> {
-  // TODO: Replace with actual DB query when DATABASE_URL is available
-  return mockProjects;
+  const projects = await getPrisma().project.findMany({
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return projects.map(toProject);
 }
 
 export async function getProject(id: string): Promise<Project | null> {
-  // TODO: Replace with actual DB query
-  return mockProjects.find(p => p.id === id) || null;
+  const project = await getPrisma().project.findUnique({
+    where: { id },
+  });
+
+  return project ? toProject(project) : null;
 }
 
-export async function createProject(project: Omit<Project, 'id' | 'createdAt' | 'updatedAt'>): Promise<Project> {
-  // TODO: Replace with actual DB insert
-  const newProject: Project = {
-    ...project,
-    id: Math.random().toString(36).substr(2, 9),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-  mockProjects.push(newProject);
-  return newProject;
+export async function createProject(project: ProjectInput): Promise<Project> {
+  const created = await getPrisma().project.create({
+    data: toProjectCreateData(project),
+  });
+
+  return toProject(created);
 }
 
-export async function updateProject(id: string, updates: Partial<Project>): Promise<Project | null> {
-  // TODO: Replace with actual DB update
-  const index = mockProjects.findIndex(p => p.id === id);
-  if (index === -1) return null;
-  
-  const updated = {
-    ...mockProjects[index],
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  };
-  mockProjects[index] = updated;
-  return updated;
+export async function updateProject(id: string, updates: ProjectUpdateInput): Promise<Project | null> {
+  try {
+    const updated = await getPrisma().project.update({
+      where: { id },
+      data: toProjectUpdateData(updates),
+    });
+
+    return toProject(updated);
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'P2025') {
+      return null;
+    }
+
+    throw error;
+  }
 }
 
 export async function deleteProject(id: string): Promise<boolean> {
-  // TODO: Replace with actual DB delete
-  const index = mockProjects.findIndex(p => p.id === id);
-  if (index === -1) return false;
-  mockProjects.splice(index, 1);
-  return true;
+  try {
+    await getPrisma().project.delete({
+      where: { id },
+    });
+
+    return true;
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'P2025') {
+      return false;
+    }
+
+    throw error;
+  }
 }
 
 export async function getDashboardStats(): Promise<DashboardStats> {
-  const projects = await getProjects();
+  const prisma = getPrisma();
+  const [totalProjects, inProgress, completed, criticalPriority] = await Promise.all([
+    prisma.project.count(),
+    prisma.project.count({ where: { status: 'In Progress' } }),
+    prisma.project.count({ where: { status: 'Completed' } }),
+    prisma.project.count({ where: { priority: 'Critical' } }),
+  ]);
+
   return {
-    totalProjects: projects.length,
-    inProgress: projects.filter(p => p.status === 'In Progress').length,
-    completed: projects.filter(p => p.status === 'Completed').length,
-    criticalPriority: projects.filter(p => p.priority === 'Critical').length,
+    totalProjects,
+    inProgress,
+    completed,
+    criticalPriority,
   };
 }
 
 export async function getProjectsByStatus(): Promise<ProjectsByStatus[]> {
-  const projects = await getProjects();
-  const statuses: ProjectStatus[] = ['Planning', 'In Progress', 'Review', 'On Hold', 'Completed'];
-  return statuses.map(status => ({
-    status,
-    count: projects.filter(p => p.status === status).length,
+  const grouped = await getPrisma().project.groupBy({
+    by: ['status'],
+    _count: { status: true },
+  });
+
+  return dashboardStatuses.map((status) => ({
+    status: status as ProjectsByStatus['status'],
+    count: grouped.find((item) => item.status === status)?._count.status ?? 0,
   }));
 }
 
 export async function getProjectsByType(): Promise<ProjectsByType[]> {
-  const projects = await getProjects();
-  const types: ProjectType[] = ['UI/UX Design', 'Web App', 'Mobile App'];
-  return types.map(type => ({
-    type,
-    count: projects.filter(p => p.type === type).length,
+  const grouped = await getPrisma().project.groupBy({
+    by: ['type'],
+    _count: { type: true },
+  });
+
+  return dashboardTypes.map((type) => ({
+    type: type as ProjectsByType['type'],
+    count: grouped.find((item) => item.type === type)?._count.type ?? 0,
   }));
 }
 
-export function updateProjectStatus(id: string, status: ProjectStatus): Project | null {
-  const project = mockProjects.find(p => p.id === id);
-  if (project) {
-    project.status = status;
-    project.updatedAt = new Date().toISOString();
-    return project;
-  }
-  return null;
+export async function updateProjectStatus(id: string, status: string): Promise<Project | null> {
+  return updateProject(id, { status });
 }
-
-export type ProjectStatus = 'Planning' | 'In Progress' | 'Review' | 'On Hold' | 'Completed';
-export type ProjectType = 'UI/UX Design' | 'Web App' | 'Mobile App';

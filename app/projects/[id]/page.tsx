@@ -24,10 +24,14 @@ export default function ProjectDetailsPage() {
   useEffect(() => {
     async function fetchProject() {
       try {
-        const res = await fetch(`/api/projects?id=${projectId}`);
-        const projects: Project[] = await res.json();
-        const found = projects.find(p => p.id === projectId);
-        setProject(found || null);
+        const res = await fetch(`/api/projects/${projectId}`);
+        if (!res.ok) {
+          setProject(null);
+          return;
+        }
+
+        const found: Project = await res.json();
+        setProject(found);
       } catch (error) {
         console.error('Failed to fetch project:', error);
       } finally {

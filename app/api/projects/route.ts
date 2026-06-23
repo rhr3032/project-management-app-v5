@@ -1,33 +1,42 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getProjects, createProject } from '@/lib/api';
+import { getProject, getProjects, createProject } from '@/lib/api';
 import { z } from 'zod';
 
 const projectSchema = z.object({
   name: z.string().min(1),
-  description: z.string(),
-  type: z.enum(['UI/UX Design', 'Web App', 'Mobile App']),
-  status: z.enum(['Planning', 'In Progress', 'Review', 'On Hold', 'Completed']),
-  priority: z.enum(['Low', 'Medium', 'High', 'Critical']),
-  effort: z.enum(['XS', 'S', 'M', 'L', 'XL']),
-  device: z.enum(['XS', 'M', 'L', 'Desktop', 'Mobile', 'Tablet']),
-  owner: z.string(),
-  startDate: z.string(),
-  endDate: z.string(),
-  deadline: z.string(),
-  clientName: z.string(),
-  clientEmail: z.string(),
-  previewLink: z.string(),
-  resourceLinks: z.array(z.object({ url: z.string(), title: z.string() })),
-  shortOverview: z.string(),
-  businessGoal: z.string(),
-  targetAudience: z.string(),
-  competitors: z.string(),
-  tags: z.array(z.string()),
-  company: z.string(),
+  description: z.string().default(''),
+  type: z.string().min(1),
+  status: z.string().min(1),
+  priority: z.string().min(1),
+  effort: z.string().min(1),
+  device: z.string().default(''),
+  owner: z.string().min(1),
+  startDate: z.string().default(''),
+  endDate: z.string().default(''),
+  deadline: z.string().default(''),
+  clientName: z.string().default(''),
+  clientEmail: z.string().default(''),
+  clientPhone: z.string().default(''),
+  previewLink: z.string().default(''),
+  resourceLinks: z.array(z.object({ url: z.string(), title: z.string() })).default([]),
+  shortOverview: z.string().default(''),
+  businessGoal: z.string().default(''),
+  targetAudience: z.string().default(''),
+  competitors: z.string().default(''),
+  tags: z.array(z.string()).default([]),
+  company: z.string().default(''),
 });
 
 export async function GET(request: NextRequest) {
   try {
+    const id = request.nextUrl.searchParams.get('id');
+    if (id) {
+      const project = await getProject(id);
+      return project
+        ? NextResponse.json(project)
+        : NextResponse.json({ error: 'Project not found' }, { status: 404 });
+    }
+
     const projects = await getProjects();
     return NextResponse.json(projects);
   } catch (error) {
@@ -43,7 +52,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors }, { status: 400 });
+      return NextResponse.json({ error: error.issues }, { status: 400 });
     }
     return NextResponse.json({ error: 'Failed to create project' }, { status: 500 });
   }

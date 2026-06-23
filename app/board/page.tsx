@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Project, ProjectStatus } from '@/types';
 import { TypeBadge, PriorityBadge, EffortBadge } from '@/components/badges';
 
-const statuses: ProjectStatus[] = ['Planning', 'In Progress', 'Review', 'On Hold', 'Completed'];
+type BoardStatus = Extract<ProjectStatus, 'Planning' | 'In Progress' | 'Review' | 'On Hold' | 'Completed'>;
 
-const statusConfig: Record<ProjectStatus, { bg: string; text: string; border: string; icon: React.ReactNode; gradient: string }> = {
+const statuses: BoardStatus[] = ['Planning', 'In Progress', 'Review', 'On Hold', 'Completed'];
+
+const statusConfig: Record<BoardStatus, { bg: string; text: string; border: string; icon: React.ReactNode; gradient: string }> = {
   'Planning': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: <FileText size={20} />, gradient: 'from-blue-400 to-blue-600' },
   'In Progress': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', icon: <Zap size={20} />, gradient: 'from-orange-400 to-orange-600' },
   'Review': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', icon: <Eye size={20} />, gradient: 'from-purple-400 to-purple-600' },
@@ -17,11 +19,15 @@ const statusConfig: Record<ProjectStatus, { bg: string; text: string; border: st
   'Completed': { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', icon: <CheckCircle size={20} />, gradient: 'from-green-400 to-green-600' },
 };
 
+function isBoardStatus(status: ProjectStatus): status is BoardStatus {
+  return statuses.includes(status as BoardStatus);
+}
+
 export default function BoardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggedProject, setDraggedProject] = useState<Project | null>(null);
-  const [projectsByStatus, setProjectsByStatus] = useState<Record<ProjectStatus, Project[]>>({
+  const [projectsByStatus, setProjectsByStatus] = useState<Record<BoardStatus, Project[]>>({
     'Planning': [],
     'In Progress': [],
     'Review': [],
@@ -36,7 +42,7 @@ export default function BoardPage() {
         const data: Project[] = await res.json();
         setProjects(data);
 
-        const grouped: Record<ProjectStatus, Project[]> = {
+        const grouped: Record<BoardStatus, Project[]> = {
           'Planning': [],
           'In Progress': [],
           'Review': [],
@@ -45,7 +51,7 @@ export default function BoardPage() {
         };
 
         data.forEach(project => {
-          if (grouped[project.status]) {
+          if (isBoardStatus(project.status)) {
             grouped[project.status].push(project);
           }
         });
@@ -70,7 +76,7 @@ export default function BoardPage() {
     e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = async (newStatus: ProjectStatus, e: React.DragEvent) => {
+  const handleDrop = async (newStatus: BoardStatus, e: React.DragEvent) => {
     e.preventDefault();
     if (!draggedProject) return;
 
@@ -79,6 +85,12 @@ export default function BoardPage() {
       return;
     }
 
+    if (!isBoardStatus(draggedProject.status)) {
+      setDraggedProject(null);
+      return;
+    }
+
+    const previousStatus = draggedProject.status;
     const updatedProject = { ...draggedProject, status: newStatus };
     
     setProjects(prev => 
@@ -87,19 +99,32 @@ export default function BoardPage() {
 
     setProjectsByStatus(prev => ({
       ...prev,
-      [draggedProject.status]: prev[draggedProject.status].filter(p => p.id !== draggedProject.id),
+      [previousStatus]: prev[previousStatus].filter((p) => p.id !== draggedProject.id),
       [newStatus]: [...prev[newStatus], updatedProject],
     }));
 
     setDraggedProject(null);
 
-    // Status update is persisted in-memory for the session
-    // For production, replace with API call to database
     try {
-      // Placeholder for persistence - currently updates are stored in session memory
-      // In production, this would call an API endpoint to save to database
+      const response = await fetch(`/api/projects/${draggedProject.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to persist project status');
+      }
     } catch (error) {
       console.error('Error updating project status:', error);
+      setProjects(prev => 
+        prev.map(p => p.id === draggedProject.id ? draggedProject : p)
+      );
+      setProjectsByStatus(prev => ({
+        ...prev,
+        [newStatus]: prev[newStatus].filter((p) => p.id !== draggedProject.id),
+        [previousStatus]: [...prev[previousStatus], draggedProject],
+      }));
     }
   };
 
