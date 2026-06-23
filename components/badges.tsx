@@ -4,76 +4,93 @@ import { ProjectStatus, ProjectPriority, ProjectType } from '@/types';
 
 function StatusBadge({ status }: { status: ProjectStatus }) {
   const colors: Partial<Record<ProjectStatus, { bg: string; text: string }>> = {
-    'Planning': { bg: 'bg-blue-100', text: 'text-blue-700' },
-    'In Progress': { bg: 'bg-orange-100', text: 'text-orange-700' },
-    'Review': { bg: 'bg-purple-100', text: 'text-purple-700' },
-    'On Hold': { bg: 'bg-gray-100', text: 'text-gray-700' },
-    'Completed': { bg: 'bg-green-100', text: 'text-green-700' },
+    'Research':             { bg: 'bg-sky-500/15 border border-sky-500/25',      text: 'text-sky-400' },
+    'Planning':             { bg: 'bg-blue-500/15 border border-blue-500/25',    text: 'text-blue-400' },
+    'In Progress':          { bg: 'bg-orange-500/15 border border-orange-500/25', text: 'text-orange-400' },
+    'Review':               { bg: 'bg-purple-500/15 border border-purple-500/25', text: 'text-purple-400' },
+    'On Hold':              { bg: 'bg-yellow-500/15 border border-yellow-500/25', text: 'text-yellow-400' },
+    'Completed':            { bg: 'bg-green-500/15 border border-green-500/25',  text: 'text-green-400' },
+    'Cancelled':            { bg: 'bg-red-500/15 border border-red-500/25',      text: 'text-red-400' },
+    'Archived':             { bg: 'bg-slate-500/15 border border-slate-500/25',  text: 'text-slate-400' },
+    'Pending Approval':     { bg: 'bg-amber-500/15 border border-amber-500/25',  text: 'text-amber-400' },
+    'Approved':             { bg: 'bg-emerald-500/15 border border-emerald-500/25', text: 'text-emerald-400' },
+    'Rejected':             { bg: 'bg-rose-500/15 border border-rose-500/25',    text: 'text-rose-400' },
+    'Needs Revision':       { bg: 'bg-pink-500/15 border border-pink-500/25',    text: 'text-pink-400' },
+    'In Testing':           { bg: 'bg-violet-500/15 border border-violet-500/25', text: 'text-violet-400' },
+    'Ready for Deployment': { bg: 'bg-teal-500/15 border border-teal-500/25',   text: 'text-teal-400' },
+    'Deployed':             { bg: 'bg-cyan-500/15 border border-cyan-500/25',    text: 'text-cyan-400' },
+    'Maintenance':          { bg: 'bg-indigo-500/15 border border-indigo-500/25', text: 'text-indigo-400' },
+    'Closed':               { bg: 'bg-gray-500/15 border border-gray-500/25',    text: 'text-gray-400' },
   };
-
-  const { bg, text } = colors[status] || { bg: 'bg-gray-100', text: 'text-gray-700' };
-  return <span className={`px-2 py-1 rounded text-xs font-medium ${bg} ${text}`}>{status}</span>;
+  const { bg, text } = colors[status] || { bg: 'bg-white/10 border border-white/15', text: 'text-foreground' };
+  return <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${bg} ${text}`}>{status}</span>;
 }
 
 function PriorityBadge({ priority }: { priority: ProjectPriority }) {
   const colors: Partial<Record<ProjectPriority, { bg: string; text: string }>> = {
-    'Low': { bg: 'bg-blue-100', text: 'text-blue-700' },
-    'Medium': { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-    'High': { bg: 'bg-orange-100', text: 'text-orange-700' },
-    'Critical': { bg: 'bg-red-100', text: 'text-red-700' },
+    'Low':           { bg: 'bg-blue-500/12 border border-blue-500/20',   text: 'text-blue-400' },
+    'Medium':        { bg: 'bg-yellow-500/12 border border-yellow-500/20', text: 'text-yellow-400' },
+    'High':          { bg: 'bg-orange-500/12 border border-orange-500/20', text: 'text-orange-400' },
+    'Critical':      { bg: 'bg-red-500/12 border border-red-500/20',      text: 'text-red-400' },
+    'Urgent':        { bg: 'bg-red-600/15 border border-red-600/25',      text: 'text-red-300' },
+    'Immediate':     { bg: 'bg-rose-500/12 border border-rose-500/20',    text: 'text-rose-400' },
+    'Important':     { bg: 'bg-amber-500/12 border border-amber-500/20',  text: 'text-amber-400' },
+    'Optional':      { bg: 'bg-slate-500/12 border border-slate-500/20',  text: 'text-slate-400' },
+    'Backlog':       { bg: 'bg-gray-500/12 border border-gray-500/20',    text: 'text-gray-400' },
+    'Strategic':     { bg: 'bg-purple-500/12 border border-purple-500/20', text: 'text-purple-400' },
+    'Key Initiative':{ bg: 'bg-indigo-500/12 border border-indigo-500/20', text: 'text-indigo-400' },
+    'Quick Win':     { bg: 'bg-green-500/12 border border-green-500/20',  text: 'text-green-400' },
   };
-
-  const { bg, text } = colors[priority] || { bg: 'bg-gray-100', text: 'text-gray-700' };
-  return <span className={`px-2 py-1 rounded text-xs font-medium ${bg} ${text}`}>{priority}</span>;
+  const { bg, text } = colors[priority] || { bg: 'bg-white/8 border border-white/12', text: 'text-muted-foreground' };
+  return <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${bg} ${text}`}>{priority}</span>;
 }
 
 function TypeBadge({ type }: { type: ProjectType }) {
   const colors: Partial<Record<ProjectType, { bg: string; text: string }>> = {
-    'UI/UX Design': { bg: 'bg-pink-100', text: 'text-pink-700' },
-    'Web App': { bg: 'bg-cyan-100', text: 'text-cyan-700' },
-    'Mobile App': { bg: 'bg-purple-100', text: 'text-purple-700' },
-    'Logo': { bg: 'bg-amber-100', text: 'text-amber-700' },
-    'Branding': { bg: 'bg-rose-100', text: 'text-rose-700' },
-    'Illustration': { bg: 'bg-violet-100', text: 'text-violet-700' },
+    'UI/UX Design':   { bg: 'bg-pink-500/12 border border-pink-500/20',   text: 'text-pink-400' },
+    'Website':        { bg: 'bg-sky-500/12 border border-sky-500/20',     text: 'text-sky-400' },
+    'Web App':        { bg: 'bg-cyan-500/12 border border-cyan-500/20',   text: 'text-cyan-400' },
+    'Mobile App':     { bg: 'bg-purple-500/12 border border-purple-500/20', text: 'text-purple-400' },
+    'Logo':           { bg: 'bg-amber-500/12 border border-amber-500/20', text: 'text-amber-400' },
+    'Branding':       { bg: 'bg-rose-500/12 border border-rose-500/20',   text: 'text-rose-400' },
+    'Illustration':   { bg: 'bg-violet-500/12 border border-violet-500/20', text: 'text-violet-400' },
+    'SEO':            { bg: 'bg-green-500/12 border border-green-500/20', text: 'text-green-400' },
+    'AI/ML Project':  { bg: 'bg-indigo-500/12 border border-indigo-500/20', text: 'text-indigo-400' },
+    'SaaS Product':   { bg: 'bg-teal-500/12 border border-teal-500/20',   text: 'text-teal-400' },
+    'E-commerce Platform': { bg: 'bg-orange-500/12 border border-orange-500/20', text: 'text-orange-400' },
   };
-
-  const { bg, text } = colors[type] || { bg: 'bg-gray-100', text: 'text-gray-700' };
-  return <span className={`px-2 py-1 rounded-lg text-xs font-bold ${bg} ${text}`}>{type}</span>;
+  const { bg, text } = colors[type] || { bg: 'bg-white/8 border border-white/12', text: 'text-muted-foreground' };
+  return <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${bg} ${text}`}>{type}</span>;
 }
 
 function EffortBadge({ effort }: { effort: string }) {
   const colors: Record<string, { bg: string; text: string }> = {
-    'XS': { bg: 'bg-green-100', text: 'text-green-700' },
-    'S': { bg: 'bg-blue-100', text: 'text-blue-700' },
-    'M': { bg: 'bg-yellow-100', text: 'text-yellow-700' },
-    'L': { bg: 'bg-orange-100', text: 'text-orange-700' },
-    'XL': { bg: 'bg-red-100', text: 'text-red-700' },
+    'XS':      { bg: 'bg-green-500/12 border border-green-500/20',    text: 'text-green-400' },
+    'S':       { bg: 'bg-blue-500/12 border border-blue-500/20',      text: 'text-blue-400' },
+    'M':       { bg: 'bg-yellow-500/12 border border-yellow-500/20',  text: 'text-yellow-400' },
+    'L':       { bg: 'bg-orange-500/12 border border-orange-500/20',  text: 'text-orange-400' },
+    'XL':      { bg: 'bg-red-500/12 border border-red-500/20',        text: 'text-red-400' },
+    'XXL':     { bg: 'bg-rose-500/12 border border-rose-500/20',      text: 'text-rose-400' },
+    'XXXL':    { bg: 'bg-purple-500/12 border border-purple-500/20',  text: 'text-purple-400' },
+    'Minimal': { bg: 'bg-emerald-500/12 border border-emerald-500/20', text: 'text-emerald-400' },
   };
-
-  const { bg, text } = colors[effort] || colors['M'];
-  return <span className={`px-2 py-1 rounded text-xs font-medium ${bg} ${text}`}>{effort}</span>;
+  const { bg, text } = colors[effort] || { bg: 'bg-white/8 border border-white/12', text: 'text-muted-foreground' };
+  return <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${bg} ${text}`}>{effort}</span>;
 }
 
 function DeviceBadge({ device }: { device: string }) {
-  const colors: Record<string, { bg: string; text: string; icon: string }> = {
-    'Desktop': { bg: 'bg-blue-100', text: 'text-blue-700', icon: '🖥️' },
-    'Mobile': { bg: 'bg-purple-100', text: 'text-purple-700', icon: '📱' },
-    'Tablet': { bg: 'bg-cyan-100', text: 'text-cyan-700', icon: '📱' },
-    'TV': { bg: 'bg-red-100', text: 'text-red-700', icon: '📺' },
-    'Post': { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '📮' },
-    'Car': { bg: 'bg-green-100', text: 'text-green-700', icon: '🚗' },
-    'Watch': { bg: 'bg-pink-100', text: 'text-pink-700', icon: '⌚' },
-    'All': { bg: 'bg-indigo-100', text: 'text-indigo-700', icon: '🌐' },
-    'XS': { bg: 'bg-red-100', text: 'text-red-700', icon: '📱' },
-    'M': { bg: 'bg-yellow-100', text: 'text-yellow-700', icon: '📱' },
-    'L': { bg: 'bg-blue-100', text: 'text-blue-700', icon: '🖥️' },
+  const icons: Record<string, string> = {
+    'Desktop': '🖥️', 'Mobile': '📱', 'Tablet': '📲', 'TV': '📺',
+    'POS': '🖨️', 'Car': '🚗', 'Watch': '⌚', 'All': '🌐', 'None': '—',
+    'Wearable': '⌚', 'IoT Device': '🔌', 'AR/VR Headset': '🥽',
+    'Game Console': '🎮', 'Drone': '🚁', 'Robot': '🤖', 'Kiosk': '🖥️',
   };
-
-  const config = colors[device] || { bg: 'bg-gray-100', text: 'text-gray-700', icon: '💻' };
-  return <span className={`px-3 py-1 rounded-lg text-xs font-bold ${config.bg} ${config.text} flex items-center gap-1 w-fit`}>
-    <span>{config.icon}</span>
-    <span>{device}</span>
-  </span>;
+  const icon = icons[device] || '💻';
+  return (
+    <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-white/[0.07] border border-white/[0.1] text-muted-foreground flex items-center gap-1 w-fit">
+      <span>{icon}</span><span>{device}</span>
+    </span>
+  );
 }
 
 export { StatusBadge, PriorityBadge, TypeBadge, EffortBadge, DeviceBadge };

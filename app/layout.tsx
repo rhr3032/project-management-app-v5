@@ -1,7 +1,8 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Sidebar } from '@/components/sidebar'
+import { AuthProvider } from '@/components/auth-provider'
+import { AppShell } from '@/components/app-shell'
 import './globals.css'
 
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
@@ -12,8 +13,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Project Hub - Design & Dev Projects',
-  description: 'Manage your design and development projects',
-  generator: 'v0.app',
+  description: 'Manage your design and development projects with a modern, beautiful interface',
+  generator: 'Next.js',
   icons: {
     icon: [
       {
@@ -34,10 +35,10 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  colorScheme: 'light dark',
+  colorScheme: 'dark',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: 'white' },
-    { media: '(prefers-color-scheme: dark)', color: 'black' },
+    { media: '(prefers-color-scheme: light)', color: '#0f172a' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
   ],
 }
 
@@ -47,14 +48,13 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} bg-background`}>
-      <body className="font-sans antialiased">
-        <div className="flex h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-auto md:ml-56 lg:ml-64">
+    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} dark`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <AuthProvider>
+          <AppShell>
             {children}
-          </main>
-        </div>
+          </AppShell>
+        </AuthProvider>
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

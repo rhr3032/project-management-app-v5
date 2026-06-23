@@ -1,39 +1,47 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Plus, Calendar, User, TrendingUp, FileText, Zap, Eye, Pause, CheckCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Plus, Calendar, User, TrendingUp } from 'lucide-react';
 import { Project, ProjectStatus } from '@/types';
-import { TypeBadge, PriorityBadge, EffortBadge } from '@/components/badges';
+import { TypeBadge, PriorityBadge } from '@/components/badges';
 
-type BoardStatus = Extract<ProjectStatus, 'Planning' | 'In Progress' | 'Review' | 'On Hold' | 'Completed'>;
+const ALL_STATUSES: ProjectStatus[] = [
+  'Research','Planning','In Progress','Review','On Hold','Completed',
+  'Cancelled','Archived','Pending Approval','Approved','Rejected',
+  'Needs Revision','In Testing','Ready for Deployment','Deployed',
+  'Maintenance','Closed',
+];
 
-const statuses: BoardStatus[] = ['Planning', 'In Progress', 'Review', 'On Hold', 'Completed'];
-
-const statusConfig: Record<BoardStatus, { bg: string; text: string; border: string; icon: React.ReactNode; gradient: string }> = {
-  'Planning': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200', icon: <FileText size={20} />, gradient: 'from-blue-400 to-blue-600' },
-  'In Progress': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-200', icon: <Zap size={20} />, gradient: 'from-orange-400 to-orange-600' },
-  'Review': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200', icon: <Eye size={20} />, gradient: 'from-purple-400 to-purple-600' },
-  'On Hold': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-200', icon: <Pause size={20} />, gradient: 'from-yellow-400 to-yellow-600' },
-  'Completed': { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-200', icon: <CheckCircle size={20} />, gradient: 'from-green-400 to-green-600' },
+const STATUS_CONFIG: Record<ProjectStatus, { gradient: string; glow: string; icon: string; accent: string }> = {
+  'Research':            { gradient: 'from-sky-600 to-sky-800',     glow: 'rgba(14,165,233,0.2)',    icon: '🔬', accent: 'border-sky-500/30 bg-sky-500/10' },
+  'Planning':            { gradient: 'from-blue-600 to-blue-800',   glow: 'rgba(59,130,246,0.2)',    icon: '📋', accent: 'border-blue-500/30 bg-blue-500/10' },
+  'In Progress':         { gradient: 'from-orange-500 to-orange-700', glow: 'rgba(249,115,22,0.2)', icon: '⚡', accent: 'border-orange-500/30 bg-orange-500/10' },
+  'Review':              { gradient: 'from-purple-600 to-purple-800', glow: 'rgba(147,51,234,0.2)', icon: '👁️', accent: 'border-purple-500/30 bg-purple-500/10' },
+  'On Hold':             { gradient: 'from-yellow-500 to-yellow-700', glow: 'rgba(234,179,8,0.2)',  icon: '⏸️', accent: 'border-yellow-500/30 bg-yellow-500/10' },
+  'Completed':           { gradient: 'from-green-600 to-green-800',  glow: 'rgba(34,197,94,0.2)',   icon: '✅', accent: 'border-green-500/30 bg-green-500/10' },
+  'Cancelled':           { gradient: 'from-red-600 to-red-800',      glow: 'rgba(239,68,68,0.2)',   icon: '❌', accent: 'border-red-500/30 bg-red-500/10' },
+  'Archived':            { gradient: 'from-slate-600 to-slate-800',  glow: 'rgba(100,116,139,0.2)', icon: '🗃️', accent: 'border-slate-500/30 bg-slate-500/10' },
+  'Pending Approval':    { gradient: 'from-amber-500 to-amber-700',  glow: 'rgba(245,158,11,0.2)',  icon: '⌛', accent: 'border-amber-500/30 bg-amber-500/10' },
+  'Approved':            { gradient: 'from-emerald-500 to-emerald-700', glow: 'rgba(16,185,129,0.2)', icon: '🎯', accent: 'border-emerald-500/30 bg-emerald-500/10' },
+  'Rejected':            { gradient: 'from-rose-600 to-rose-800',    glow: 'rgba(244,63,94,0.2)',   icon: '🚫', accent: 'border-rose-500/30 bg-rose-500/10' },
+  'Needs Revision':      { gradient: 'from-pink-500 to-pink-700',    glow: 'rgba(236,72,153,0.2)',  icon: '✏️', accent: 'border-pink-500/30 bg-pink-500/10' },
+  'In Testing':          { gradient: 'from-violet-600 to-violet-800', glow: 'rgba(139,92,246,0.2)', icon: '🧪', accent: 'border-violet-500/30 bg-violet-500/10' },
+  'Ready for Deployment':{ gradient: 'from-teal-600 to-teal-800',   glow: 'rgba(20,184,166,0.2)',   icon: '🚀', accent: 'border-teal-500/30 bg-teal-500/10' },
+  'Deployed':            { gradient: 'from-cyan-600 to-cyan-800',   glow: 'rgba(6,182,212,0.2)',    icon: '🌐', accent: 'border-cyan-500/30 bg-cyan-500/10' },
+  'Maintenance':         { gradient: 'from-indigo-600 to-indigo-800', glow: 'rgba(99,102,241,0.2)', icon: '🔧', accent: 'border-indigo-500/30 bg-indigo-500/10' },
+  'Closed':              { gradient: 'from-gray-600 to-gray-800',    glow: 'rgba(107,114,128,0.2)', icon: '🔒', accent: 'border-gray-500/30 bg-gray-500/10' },
 };
-
-function isBoardStatus(status: ProjectStatus): status is BoardStatus {
-  return statuses.includes(status as BoardStatus);
-}
 
 export default function BoardPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [draggedProject, setDraggedProject] = useState<Project | null>(null);
-  const [projectsByStatus, setProjectsByStatus] = useState<Record<BoardStatus, Project[]>>({
-    'Planning': [],
-    'In Progress': [],
-    'Review': [],
-    'On Hold': [],
-    'Completed': [],
-  });
+  const [dragOverStatus, setDragOverStatus] = useState<ProjectStatus | null>(null);
+  const [projectsByStatus, setProjectsByStatus] = useState<Record<ProjectStatus, Project[]>>(
+    () => Object.fromEntries(ALL_STATUSES.map(s => [s, []])) as Record<ProjectStatus, Project[]>
+  );
+  const boardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchProjects() {
@@ -42,198 +50,188 @@ export default function BoardPage() {
         const data: Project[] = await res.json();
         setProjects(data);
 
-        const grouped: Record<BoardStatus, Project[]> = {
-          'Planning': [],
-          'In Progress': [],
-          'Review': [],
-          'On Hold': [],
-          'Completed': [],
-        };
-
-        data.forEach(project => {
-          if (isBoardStatus(project.status)) {
-            grouped[project.status].push(project);
-          }
+        const grouped = Object.fromEntries(ALL_STATUSES.map(s => [s, []])) as Record<ProjectStatus, Project[]>;
+        data.forEach(p => {
+          if (grouped[p.status] !== undefined) grouped[p.status].push(p);
         });
-
         setProjectsByStatus(grouped);
-      } catch (error) {
-        console.error('Failed to fetch projects:', error);
+      } catch (err) {
+        console.error('Failed to fetch projects:', err);
       } finally {
         setLoading(false);
       }
     }
-
     fetchProjects();
   }, []);
 
-  const handleDragStart = (project: Project) => {
-    setDraggedProject(project);
-  };
+  const handleDragStart = (project: Project) => setDraggedProject(project);
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, status: ProjectStatus) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
+    setDragOverStatus(status);
   };
 
-  const handleDrop = async (newStatus: BoardStatus, e: React.DragEvent) => {
+  const handleDragLeave = () => setDragOverStatus(null);
+
+  const handleDrop = async (newStatus: ProjectStatus, e: React.DragEvent) => {
     e.preventDefault();
-    if (!draggedProject) return;
-
-    if (draggedProject.status === newStatus) {
-      setDraggedProject(null);
-      return;
-    }
-
-    if (!isBoardStatus(draggedProject.status)) {
+    setDragOverStatus(null);
+    if (!draggedProject || draggedProject.status === newStatus) {
       setDraggedProject(null);
       return;
     }
 
     const previousStatus = draggedProject.status;
     const updatedProject = { ...draggedProject, status: newStatus };
-    
-    setProjects(prev => 
-      prev.map(p => p.id === draggedProject.id ? updatedProject : p)
-    );
 
     setProjectsByStatus(prev => ({
       ...prev,
-      [previousStatus]: prev[previousStatus].filter((p) => p.id !== draggedProject.id),
+      [previousStatus]: prev[previousStatus].filter(p => p.id !== draggedProject.id),
       [newStatus]: [...prev[newStatus], updatedProject],
     }));
-
     setDraggedProject(null);
 
     try {
-      const response = await fetch(`/api/projects/${draggedProject.id}`, {
+      const res = await fetch(`/api/projects/${draggedProject.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to persist project status');
-      }
-    } catch (error) {
-      console.error('Error updating project status:', error);
-      setProjects(prev => 
-        prev.map(p => p.id === draggedProject.id ? draggedProject : p)
-      );
+      if (!res.ok) throw new Error('Failed');
+    } catch {
+      // Revert
       setProjectsByStatus(prev => ({
         ...prev,
-        [newStatus]: prev[newStatus].filter((p) => p.id !== draggedProject.id),
+        [newStatus]: prev[newStatus].filter(p => p.id !== draggedProject.id),
         [previousStatus]: [...prev[previousStatus], draggedProject],
       }));
     }
   };
 
+  const getPlainText = (html: string) => html ? html.replace(/<[^>]*>/g, '').slice(0, 80) : '';
+
   if (loading) {
     return (
-      <div className="p-4 md:p-8 flex items-center justify-center min-h-screen">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+          <p className="text-muted-foreground text-sm">Loading board...</p>
+        </div>
       </div>
     );
   }
 
+  const totalProjects = projects.length;
+
   return (
-    <div className="p-4 md:p-8 bg-background min-h-screen">
-      {/* Header */}
-      <div className="mb-8 animate-fadeInUp">
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground flex items-center gap-2">
-              <TrendingUp className="text-primary" size={32} />
-              Board
-            </h1>
-            <p className="text-muted-foreground mt-1 text-sm md:text-base">Projects organized by status</p>
+    <div className="min-h-screen flex flex-col">
+      {/* Sticky Header */}
+      <div className="glass-header sticky top-0 z-20 px-4 md:px-8 py-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <TrendingUp size={18} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Project Board</h1>
+              <p className="text-xs text-muted-foreground">{totalProjects} projects · {ALL_STATUSES.length} columns</p>
+            </div>
           </div>
-          <Link href="/projects/new" className="w-full md:w-auto">
-            <Button className="w-full md:w-auto bg-gradient-to-r from-primary to-blue-600 hover:from-primary/90 hover:to-blue-700 text-primary-foreground shadow-lg">
-              <Plus size={16} className="mr-2" />
-              New Project
-            </Button>
+          <Link href="/projects/new">
+            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-sm">
+              <Plus size={15} /> New Project
+            </button>
           </Link>
         </div>
       </div>
 
-      {/* Kanban Board - Responsive */}
-      <div className="overflow-x-auto pb-8 -mx-4 md:mx-0 px-4 md:px-0">
-        <div className="flex gap-6 md:gap-4 min-w-full md:min-w-0 md:grid md:grid-cols-5">
-          {statuses.map(status => {
-            const config = statusConfig[status];
+      {/* Board */}
+      <div ref={boardRef} className="kanban-scroll flex-1 px-4 md:px-6 pb-8 pt-4">
+        <div className="flex gap-4" style={{ minWidth: `${ALL_STATUSES.length * 296}px` }}>
+          {ALL_STATUSES.map((status, colIdx) => {
+            const config = STATUS_CONFIG[status];
             const statusProjects = projectsByStatus[status];
+            const isDragTarget = dragOverStatus === status;
 
             return (
-              <div key={status} className="flex-shrink-0 w-80 md:w-auto md:flex-1 flex flex-col animate-slideInLeft" style={{ animationDelay: `${statuses.indexOf(status) * 100}ms` }}>
+              <div
+                key={status}
+                className="flex-shrink-0 w-72 flex flex-col animate-slideInLeft"
+                style={{ animationDelay: `${colIdx * 40}ms` }}
+              >
                 {/* Column Header */}
-                <div className="mb-4 sticky top-0 z-10">
-                  <div className={`flex items-center justify-between px-4 py-3 rounded-lg ${config.bg} border ${config.border}`}>
+                <div className={`mb-3 p-3 rounded-xl border ${config.accent} transition-all`}>
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className={`${config.text}`}>
-                        {config.icon}
-                      </div>
-                      <div>
-                        <h2 className={`text-sm font-bold ${config.text}`}>{status}</h2>
-                      </div>
+                      <span className="text-base">{config.icon}</span>
+                      <span className="text-xs font-bold text-foreground">{status}</span>
                     </div>
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full bg-white ${config.text}`}>
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full bg-gradient-to-r ${config.gradient} text-white`}>
                       {statusProjects.length}
                     </span>
                   </div>
                 </div>
 
-                {/* Cards Container */}
-                <div 
-                  className={`flex-1 space-y-3 rounded-xl p-4 min-h-[500px] ${config.bg} border-2 ${config.border} transition-all`}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(status, e)}
+                {/* Drop Zone */}
+                <div
+                  className={`flex-1 min-h-[500px] rounded-xl border-2 transition-all p-2.5 space-y-3 ${
+                    isDragTarget
+                      ? `border-dashed ${config.accent} shadow-lg`
+                      : 'border-transparent bg-white/[0.02]'
+                  }`}
+                  onDragOver={e => handleDragOver(e, status)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={e => handleDrop(status, e)}
+                  style={isDragTarget ? { boxShadow: `0 0 20px ${config.glow}` } : undefined}
                 >
                   {statusProjects.length === 0 ? (
-                    <div className="text-sm text-muted-foreground text-center py-12 flex items-center justify-center h-full">
+                    <div className="h-24 flex items-center justify-center text-center text-muted-foreground/40 text-xs border-2 border-dashed border-white/[0.06] rounded-xl">
                       <div>
-                        <p className="text-2xl mb-2">✨</p>
-                        <p>No projects yet</p>
+                        <p className="text-lg mb-1">+</p>
+                        <p>Drop here</p>
                       </div>
                     </div>
                   ) : (
-                    statusProjects.map((project, idx) => (
-                      <div 
+                    statusProjects.map(project => (
+                      <div
                         key={project.id}
                         draggable
                         onDragStart={() => handleDragStart(project)}
-                        onClick={() => {}}
-                        className={`bg-white rounded-lg p-4 border-2 border-transparent hover:border-primary/50 shadow-sm hover:shadow-lg cursor-grab active:cursor-grabbing transition-smooth group ${
-                          draggedProject?.id === project.id ? 'opacity-50 ring-2 ring-primary' : ''
+                        className={`glass-card overflow-hidden p-4 cursor-grab active:cursor-grabbing transition-all group select-none ${
+                          draggedProject?.id === project.id ? 'opacity-40 scale-95' : 'hover:scale-[1.01]'
                         }`}
+                        style={{ animationDelay: '0ms' }}
                       >
-                        {/* Top border accent */}
-                        <div className={`h-1 -mx-4 -mt-4 mb-4 rounded-t-lg bg-gradient-to-r ${config.gradient}`}></div>
+                        {/* Top accent bar */}
+                        <div className={`h-0.5 -mx-4 -mt-4 mb-3 bg-gradient-to-r ${config.gradient}`} />
 
-                        <Link href={`/projects/${project.id}`}>
-                          <h3 className="font-semibold text-foreground text-sm mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        <Link href={`/projects/${project.id}`} onClick={e => e.stopPropagation()}>
+                          <h3 className="font-semibold text-sm text-foreground mb-1.5 line-clamp-2 group-hover:text-indigo-400 transition-colors">
                             {project.name}
                           </h3>
-
-                          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                            {project.description}
-                          </p>
+                          {project.description && (
+                            <p className="text-xs text-muted-foreground mb-2.5 line-clamp-2 leading-relaxed">
+                              {getPlainText(project.description)}
+                            </p>
+                          )}
                         </Link>
 
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <div className="flex flex-wrap gap-1.5 mb-3">
                           <TypeBadge type={project.type} />
                           <PriorityBadge priority={project.priority} />
                         </div>
 
-                        <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-gray-200">
-                          <div className="flex items-center gap-1">
-                            <User size={14} />
-                            <span className="truncate">{project.owner}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Calendar size={14} />
-                            <span>{new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                          </div>
+                        <div className="flex items-center justify-between text-xs text-muted-foreground pt-2.5 border-t border-white/[0.06]">
+                          <span className="flex items-center gap-1 truncate">
+                            <User size={11} />{project.owner}
+                          </span>
+                          {project.deadline && (
+                            <span className="flex items-center gap-1 flex-shrink-0">
+                              <Calendar size={11} />
+                              {new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          )}
                         </div>
                       </div>
                     ))

@@ -11,8 +11,19 @@ type ProjectInput = Omit<Project, 'id' | 'createdAt' | 'updatedAt' | 'type' | 's
 };
 type ProjectUpdateInput = Partial<ProjectInput>;
 
-const dashboardStatuses = ['Planning', 'In Progress', 'Review', 'On Hold', 'Completed'];
-const dashboardTypes = ['UI/UX Design', 'Web App', 'Mobile App'];
+const dashboardStatuses = [
+  'Research','Planning','In Progress','Review','On Hold','Completed',
+  'Cancelled','Archived','Pending Approval','Approved','Rejected',
+  'Needs Revision','In Testing','Ready for Deployment','Deployed','Maintenance','Closed',
+];
+const dashboardTypes = [
+  'UI/UX Design','Website','Web App','Mobile App','Logo','Branding','Illustration',
+  'Marketing Material','Video Production','Photography','Content Creation','SEO',
+  'Social Media Campaign','Email Campaign','Print Design','Packaging Design',
+  '3D Modeling','Animation','Game Development','AR/VR Experience','IoT Project',
+  'AI/ML Project','Data Visualization','E-commerce Platform','SaaS Product',
+  'Enterprise Software','Open Source Contribution','Research Project',
+];
 
 function toStringArray(value: Prisma.JsonValue): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];

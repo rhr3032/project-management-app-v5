@@ -1,81 +1,120 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, ExternalLink, Mail, Phone, FileText, Target, Users, Zap, Tag, Link2 } from 'lucide-react';
+import { ChevronLeft, ExternalLink, Mail, Phone, Target, Users, Tag, Link2, Pencil, Trash2 } from 'lucide-react';
 import { Project } from '@/types';
 import { StatusBadge, TypeBadge, PriorityBadge, EffortBadge, DeviceBadge } from '@/components/badges';
+import { ConfirmDialog } from '@/components/confirm-dialog';
 
-const statusGradients: Record<string, string> = {
-  'Planning': 'from-blue-400 to-blue-600',
-  'In Progress': 'from-orange-400 to-orange-600',
-  'Review': 'from-purple-400 to-purple-600',
-  'On Hold': 'from-yellow-400 to-yellow-600',
-  'Completed': 'from-green-400 to-green-600',
+const STATUS_GRADIENTS: Record<string, string> = {
+  'Research':             'from-sky-900 via-sky-800 to-slate-900',
+  'Planning':             'from-blue-900 via-blue-800 to-slate-900',
+  'In Progress':          'from-orange-900 via-orange-800 to-slate-900',
+  'Review':               'from-purple-900 via-purple-800 to-slate-900',
+  'On Hold':              'from-yellow-900 via-yellow-800 to-slate-900',
+  'Completed':            'from-green-900 via-green-800 to-slate-900',
+  'Cancelled':            'from-red-900 via-red-800 to-slate-900',
+  'Archived':             'from-slate-800 via-slate-700 to-slate-900',
+  'Pending Approval':     'from-amber-900 via-amber-800 to-slate-900',
+  'Approved':             'from-emerald-900 via-emerald-800 to-slate-900',
+  'Rejected':             'from-rose-900 via-rose-800 to-slate-900',
+  'Needs Revision':       'from-pink-900 via-pink-800 to-slate-900',
+  'In Testing':           'from-violet-900 via-violet-800 to-slate-900',
+  'Ready for Deployment': 'from-teal-900 via-teal-800 to-slate-900',
+  'Deployed':             'from-cyan-900 via-cyan-800 to-slate-900',
+  'Maintenance':          'from-indigo-900 via-indigo-800 to-slate-900',
+  'Closed':               'from-gray-800 via-gray-700 to-slate-900',
 };
 
 export default function ProjectDetailsPage() {
   const params = useParams();
+  const router = useRouter();
   const projectId = params.id as string;
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteDialog, setDeleteDialog] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     async function fetchProject() {
       try {
         const res = await fetch(`/api/projects/${projectId}`);
-        if (!res.ok) {
-          setProject(null);
-          return;
-        }
-
-        const found: Project = await res.json();
-        setProject(found);
-      } catch (error) {
-        console.error('Failed to fetch project:', error);
-      } finally {
-        setLoading(false);
-      }
+        if (!res.ok) { setProject(null); return; }
+        setProject(await res.json());
+      } catch { setProject(null); }
+      finally { setLoading(false); }
     }
-
-    if (projectId) {
-      fetchProject();
-    }
+    if (projectId) fetchProject();
   }, [projectId]);
 
+  const handleDelete = async () => {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/projects/${projectId}`, { method: 'DELETE' });
+      if (res.ok) router.push('/projects');
+    } catch { console.error('Delete failed'); }
+    finally { setDeleting(false); setDeleteDialog(false); }
+  };
+
   if (loading) return (
-    <div className="p-4 md:p-8 flex items-center justify-center min-h-screen">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"></div>
-    </div>
-  );
-  if (!project) return (
-    <div className="p-4 md:p-8">
-      <div className="text-center py-12">
-        <h2 className="text-2xl font-bold text-foreground">Project not found</h2>
-        <Link href="/projects">
-          <button className="text-primary hover:underline mt-4">← Back to Projects</button>
-        </Link>
-      </div>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
     </div>
   );
 
-  const gradient = statusGradients[project.status] || 'from-primary to-blue-600';
+  if (!project) return (
+    <div className="p-8 text-center min-h-screen flex flex-col items-center justify-center">
+      <p className="text-4xl mb-4">🔍</p>
+      <h2 className="text-2xl font-bold text-foreground mb-2">Project not found</h2>
+      <Link href="/projects"><button className="text-indigo-400 hover:text-indigo-300 mt-4 transition-colors">← Back to Projects</button></Link>
+    </div>
+  );
+
+  const gradient = STATUS_GRADIENTS[project.status] || 'from-indigo-900 via-indigo-800 to-slate-900';
+
+  const Section = ({ icon, title, children, className = '' }: { icon?: React.ReactNode; title: string; children: React.ReactNode; className?: string }) => (
+    <div className={`glass-card p-6 ${className}`}>
+      <h3 className="text-xs font-bold text-muted-foreground mb-5 flex items-center gap-2 uppercase tracking-wider">
+        {icon} {title}
+      </h3>
+      {children}
+    </div>
+  );
 
   return (
-    <div className="bg-background min-h-screen">
+    <div className="min-h-screen">
       {/* Hero Header */}
-      <div className={`bg-gradient-to-r ${gradient} text-white pt-8 pb-12 px-4 md:px-8 animate-fadeIn`}>
-        <div className="max-w-6xl mx-auto">
-          <Link href="/projects">
-            <button className="flex items-center gap-2 text-white/80 hover:text-white mb-6 transition-smooth">
-              <ChevronLeft size={20} />
-              Back to Projects
-            </button>
-          </Link>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 text-balance">{project.name}</h1>
-          <p className="text-white/90 mb-6 text-lg max-w-2xl">{project.description}</p>
-          <div className="flex flex-wrap items-center gap-3">
+      <div className={`bg-gradient-to-br ${gradient} text-white pt-8 pb-14 px-4 md:px-8 relative overflow-hidden`}>
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+        </div>
+        <div className="relative max-w-5xl mx-auto">
+          <div className="flex items-center justify-between mb-6">
+            <Link href="/projects">
+              <button className="flex items-center gap-2 text-white/70 hover:text-white transition-all text-sm">
+                <ChevronLeft size={18} /> Back to Projects
+              </button>
+            </Link>
+            <div className="flex items-center gap-2">
+              <Link href={`/projects/${project.id}/edit`}>
+                <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-medium transition-all border border-white/20">
+                  <Pencil size={13} /> Edit
+                </button>
+              </Link>
+              <button
+                onClick={() => setDeleteDialog(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs font-medium transition-all border border-red-500/30"
+              >
+                <Trash2 size={13} /> Delete
+              </button>
+            </div>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{project.name}</h1>
+
+          <div className="flex flex-wrap items-center gap-2 mb-4">
             <TypeBadge type={project.type} />
             <StatusBadge status={project.status} />
             <PriorityBadge priority={project.priority} />
@@ -85,183 +124,152 @@ export default function ProjectDetailsPage() {
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-8 space-y-6 animate-fadeInUp">
-        {/* Project Info Grid */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Owner & Company */}
-        <div className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-smooth">
-          <div className="flex items-start justify-between mb-4">
-            <div>
-              <h3 className="text-sm font-semibold text-muted-foreground mb-1">OWNER</h3>
-              <p className="text-xl font-bold text-foreground">{project.owner}</p>
-            </div>
-            <Zap className="text-primary" size={24} />
-          </div>
-          <div className="mt-6 pt-6 border-t border-border">
-            <h3 className="text-sm font-semibold text-muted-foreground mb-1">COMPANY</h3>
-            <p className="text-lg font-semibold text-foreground">{project.company}</p>
-          </div>
-        </div>
-
-        {/* Timeline */}
-        <div className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-smooth">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
-            📅 PROJECT TIMELINE
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Start</span>
-              <span className="font-semibold text-foreground">{new Date(project.startDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-            </div>
-            <div className="h-1 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full"></div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">End</span>
-              <span className="font-semibold text-foreground">{new Date(project.endDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-            </div>
-            <div className="flex justify-between items-center pt-2 mt-2 border-t border-border">
-              <span className="text-sm text-muted-foreground">Deadline</span>
-              <span className="font-bold text-primary">{new Date(project.deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Client Information */}
-      <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-primary/10 p-6 hover:shadow-lg transition-smooth">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-6 flex items-center gap-2">
-          👤 CLIENT INFORMATION
-        </h3>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div>
-            <p className="text-xs text-muted-foreground font-semibold mb-2">FULL NAME</p>
-            <p className="text-lg font-bold text-foreground">{project.clientName}</p>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-semibold mb-2 flex items-center gap-1">
-              <Mail size={14} /> EMAIL
-            </p>
-            <a href={`mailto:${project.clientEmail}`} className="font-semibold text-primary hover:underline break-all">
-              {project.clientEmail}
-            </a>
-          </div>
-          <div>
-            <p className="text-xs text-muted-foreground font-semibold mb-2 flex items-center gap-1">
-              <Phone size={14} /> PHONE
-            </p>
-            <a href={`tel:${project.clientPhone}`} className="font-semibold text-primary hover:underline">
-              {project.clientPhone || 'N/A'}
-            </a>
-          </div>
-        </div>
-      </div>
-
-      {/* Links Section */}
-      <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-xl border border-cyan-200/50 p-6 hover:shadow-lg transition-smooth">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-6 flex items-center gap-2">
-          <Link2 size={18} className="text-cyan-600" /> PROJECT LINKS
-        </h3>
-        <div className="space-y-4">
-          {project.previewLink && (
-            <div className="bg-white rounded-lg p-4 border border-cyan-100">
-              <p className="text-xs font-semibold text-muted-foreground mb-2">🎨 PREVIEW LINK</p>
-              <a
-                href={project.previewLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-primary hover:text-blue-700 flex items-center gap-2 break-all"
-              >
-                {project.previewLink.replace('https://', '')}
-                <ExternalLink size={16} className="flex-shrink-0" />
-              </a>
-            </div>
-          )}
-
-          {project.resourceLinks && project.resourceLinks.length > 0 ? (
-            <div>
-              <p className="text-xs font-semibold text-muted-foreground mb-3">📚 RESOURCE LINKS</p>
-              <div className="space-y-2">
-                {project.resourceLinks.map((link, idx) => (
-                  <a
-                    key={idx}
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-white rounded-lg p-3 border border-cyan-100 font-semibold text-primary hover:bg-primary/5 flex items-center gap-2 transition-smooth"
-                  >
-                    {link.title}
-                    <ExternalLink size={16} className="flex-shrink-0" />
-                  </a>
-                ))}
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-6 animate-fadeInUp mt-6">
+        {/* Owner & Timeline */}
+        <div className="grid md:grid-cols-2 gap-6">
+          <Section title="Owner & Company">
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs text-muted-foreground font-semibold mb-1">OWNER</p>
+                <p className="text-lg font-bold text-foreground">{project.owner || '—'}</p>
+              </div>
+              <div className="pt-4 border-t border-white/[0.06]">
+                <p className="text-xs text-muted-foreground font-semibold mb-1">COMPANY</p>
+                <p className="text-base font-semibold text-foreground">{project.company || '—'}</p>
               </div>
             </div>
-          ) : (
-            <p className="text-sm text-muted-foreground bg-white/50 p-3 rounded-lg">No additional resource links yet.</p>
-          )}
+          </Section>
+
+          <Section icon="📅" title="Project Timeline">
+            <div className="space-y-3">
+              {[
+                { label: 'Start', value: project.startDate },
+                { label: 'End', value: project.endDate },
+                { label: 'Deadline', value: project.deadline },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between items-center">
+                  <span className="text-sm text-muted-foreground">{label}</span>
+                  <span className={`font-semibold text-sm ${label === 'Deadline' ? 'text-indigo-400' : 'text-foreground'}`}>
+                    {value ? new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Section>
         </div>
+
+        {/* Client */}
+        {(project.clientName || project.clientEmail || project.clientPhone) && (
+          <Section icon="👤" title="Client Information">
+            <div className="grid sm:grid-cols-3 gap-6">
+              <div>
+                <p className="text-xs text-muted-foreground font-semibold mb-1">NAME</p>
+                <p className="font-semibold text-foreground">{project.clientName || '—'}</p>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-semibold mb-1 flex items-center gap-1"><Mail size={12} /> EMAIL</p>
+                {project.clientEmail
+                  ? <a href={`mailto:${project.clientEmail}`} className="font-semibold text-indigo-400 hover:underline break-all">{project.clientEmail}</a>
+                  : <p className="text-muted-foreground">—</p>}
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground font-semibold mb-1 flex items-center gap-1"><Phone size={12} /> PHONE</p>
+                {project.clientPhone
+                  ? <a href={`tel:${project.clientPhone}`} className="font-semibold text-indigo-400 hover:underline">{project.clientPhone}</a>
+                  : <p className="text-muted-foreground">—</p>}
+              </div>
+            </div>
+          </Section>
+        )}
+
+        {/* Description */}
+        {project.description && (
+          <Section title="Project Description">
+            <div
+              className="prose-editor text-sm leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: project.description }}
+            />
+          </Section>
+        )}
+
+        {/* Links */}
+        {(project.previewLink || (project.resourceLinks && project.resourceLinks.length > 0)) && (
+          <Section icon={<Link2 size={14} />} title="Project Links">
+            <div className="space-y-3">
+              {project.previewLink && (
+                <a href={project.previewLink} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-all text-indigo-400 font-medium text-sm">
+                  🎨 {project.previewLink.replace(/^https?:\/\//, '').slice(0, 60)}
+                  <ExternalLink size={14} className="flex-shrink-0 ml-auto" />
+                </a>
+              )}
+              {project.resourceLinks?.map((link, idx) => (
+                <a key={idx} href={link.url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-3 rounded-xl bg-white/[0.04] border border-white/[0.08] hover:bg-white/[0.07] transition-all text-indigo-400 font-medium text-sm">
+                  📎 {link.title}
+                  <ExternalLink size={14} className="flex-shrink-0 ml-auto" />
+                </a>
+              ))}
+            </div>
+          </Section>
+        )}
+
+        {/* Strategy */}
+        {(project.shortOverview || project.businessGoal || project.targetAudience || project.competitors) && (
+          <Section icon={<Target size={14} />} title="Project Strategy">
+            <div className="grid sm:grid-cols-2 gap-4">
+              {project.shortOverview && (
+                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                  <p className="text-xs font-bold text-purple-400 mb-2">📄 OVERVIEW</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{project.shortOverview}</p>
+                </div>
+              )}
+              {project.businessGoal && (
+                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                  <p className="text-xs font-bold text-amber-400 mb-2">🎯 BUSINESS GOAL</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{project.businessGoal}</p>
+                </div>
+              )}
+              {project.targetAudience && (
+                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                  <p className="text-xs font-bold text-cyan-400 mb-2 flex items-center gap-1"><Users size={12} /> TARGET AUDIENCE</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{project.targetAudience}</p>
+                </div>
+              )}
+              {project.competitors && (
+                <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
+                  <p className="text-xs font-bold text-rose-400 mb-2">🏆 COMPETITORS</p>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{project.competitors}</p>
+                </div>
+              )}
+            </div>
+          </Section>
+        )}
+
+        {/* Tags */}
+        {project.tags && project.tags.length > 0 && (
+          <Section icon={<Tag size={14} />} title="Project Tags">
+            <div className="flex flex-wrap gap-2">
+              {project.tags.map((tag, idx) => (
+                <span key={idx} className="px-3 py-1.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 rounded-full text-xs font-bold hover:bg-indigo-500/20 transition-all">
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          </Section>
+        )}
       </div>
 
-      {/* Project Strategy Section */}
-      <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl border border-purple-200/50 p-6 hover:shadow-lg transition-smooth">
-        <h3 className="text-sm font-semibold text-muted-foreground mb-6 flex items-center gap-2">
-          <Target size={18} className="text-purple-600" /> PROJECT STRATEGY
-        </h3>
-
-        <div className="grid md:grid-cols-2 gap-6">
-          {project.shortOverview && (
-            <div className="bg-white rounded-lg p-4 border border-purple-100">
-              <p className="text-xs font-bold text-purple-600 mb-2 flex items-center gap-1">
-                <FileText size={14} /> OVERVIEW
-              </p>
-              <p className="text-sm text-foreground leading-relaxed">{project.shortOverview}</p>
-            </div>
-          )}
-
-          {project.businessGoal && (
-            <div className="bg-white rounded-lg p-4 border border-purple-100">
-              <p className="text-xs font-bold text-purple-600 mb-2 flex items-center gap-1">
-                🎯 BUSINESS GOAL
-              </p>
-              <p className="text-sm text-foreground leading-relaxed">{project.businessGoal}</p>
-            </div>
-          )}
-
-          {project.targetAudience && (
-            <div className="bg-white rounded-lg p-4 border border-purple-100">
-              <p className="text-xs font-bold text-purple-600 mb-2 flex items-center gap-1">
-                <Users size={14} /> TARGET AUDIENCE
-              </p>
-              <p className="text-sm text-foreground leading-relaxed">{project.targetAudience}</p>
-            </div>
-          )}
-
-          {project.competitors && (
-            <div className="bg-white rounded-lg p-4 border border-purple-100">
-              <p className="text-xs font-bold text-purple-600 mb-2">🏆 COMPETITORS</p>
-              <p className="text-sm text-foreground leading-relaxed">{project.competitors}</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Tags Section */}
-      {project.tags && project.tags.length > 0 && (
-        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl border border-yellow-200/50 p-6 hover:shadow-lg transition-smooth">
-          <h3 className="text-sm font-semibold text-muted-foreground mb-4 flex items-center gap-2">
-            <Tag size={18} className="text-orange-600" /> PROJECT TAGS
-          </h3>
-          <div className="flex items-center gap-2 flex-wrap">
-            {project.tags.map((tag, idx) => (
-              <span
-                key={idx}
-                className="px-4 py-2 bg-gradient-to-r from-yellow-100 to-orange-100 text-orange-700 rounded-full text-xs font-bold border border-orange-200 hover:shadow-md transition-smooth"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-      </div>
+      <ConfirmDialog
+        isOpen={deleteDialog}
+        title="Delete Project"
+        message={`Are you sure you want to delete "${project.name}"? This action cannot be undone.`}
+        confirmLabel={deleting ? 'Deleting...' : 'Delete Project'}
+        cancelLabel="Keep Project"
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteDialog(false)}
+        danger
+      />
     </div>
   );
 }

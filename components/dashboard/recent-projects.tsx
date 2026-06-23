@@ -36,31 +36,19 @@ export function RecentProjects() {
     <div className="space-y-4">
       {projects.map((project) => (
         <Link key={project.id} href={`/projects/${project.id}`}>
-          <div className="border border-border rounded-lg p-4 hover:border-primary/50 transition-colors cursor-pointer">
-            <div className="flex items-start justify-between mb-3">
-              <h3 className="font-semibold text-foreground hover:text-primary">{project.name}</h3>
+          <div className="glass-card p-4 hover:scale-[1.01] transition-all cursor-pointer" style={{ animationDelay: '0ms' }}>
+            <h3 className="font-semibold text-foreground hover:text-indigo-400 transition-colors mb-1">{project.name}</h3>
+            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+              {(project.description || '').replace(/<[^>]*>/g, '').slice(0, 100)}
+            </p>
+            <div className="flex items-center gap-2 flex-wrap mb-3">
+              <TypeBadge type={project.type} />
+              <StatusBadge status={project.status} />
+              <PriorityBadge priority={project.priority} />
             </div>
-            <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{project.description}</p>
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="flex items-center gap-2 flex-wrap">
-                <TypeBadge type={project.type} />
-                <StatusBadge status={project.status} />
-                <PriorityBadge priority={project.priority} />
-              </div>
-            </div>
-            <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <User size={14} />
-                <span>{project.owner}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Building2 size={14} />
-                <span>{project.company}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Calendar size={14} />
-                <span>{new Date(project.endDate).toLocaleDateString()}</span>
-              </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><User size={12} />{project.owner}</span>
+              {project.company && <span className="flex items-center gap-1"><Building2 size={12} />{project.company}</span>}
             </div>
           </div>
         </Link>

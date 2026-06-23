@@ -34,17 +34,11 @@ export function CriticalItems() {
   return (
     <div className="space-y-3">
       {criticalProjects.map((project) => (
-        <div key={project.id} className="flex items-start gap-3">
-          <div className="mt-1">
-            <AlertCircle size={16} className="text-red-500" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-medium text-foreground">{project.name}</p>
-            <div className="flex items-center gap-2 mt-1">
-              <span className="px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
-                Review
-              </span>
-            </div>
+        <div key={project.id} className="flex items-start gap-3 p-3 rounded-xl bg-red-500/[0.06] border border-red-500/20">
+          <AlertCircle size={15} className="text-red-400 mt-0.5 flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground truncate">{project.name}</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{project.status} · {project.priority}</p>
           </div>
         </div>
       ))}
