@@ -35,7 +35,7 @@ export function RecentProjects() {
   return (
     <div className="space-y-4">
       {projects.map((project) => (
-        <Link key={project.id} href={`/projects/${project.id}`}>
+        <Link key={project.id} href={`/projects/${project.id}`} className="block">
           <div className="glass-card p-4 hover:scale-[1.01] transition-all cursor-pointer" style={{ animationDelay: '0ms' }}>
             <h3 className="font-semibold text-foreground hover:text-indigo-400 transition-colors mb-1">{project.name}</h3>
             <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
