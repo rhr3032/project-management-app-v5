@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, ExternalLink, Mail, Phone, Target, Users, Tag, Link2, Pencil, Trash2 } from 'lucide-react';
 import { Project } from '@/types';
-import { StatusBadge, TypeBadge, PriorityBadge, EffortBadge, DeviceBadge } from '@/components/badges';
+import { StatusBadge, TypeBadge, ProjectTypeBadge, PriorityBadge, EffortBadge, DeviceBadge } from '@/components/badges';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const STATUS_GRADIENTS: Record<string, string> = {
@@ -115,6 +115,7 @@ export default function ProjectDetailsPage() {
           <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight">{project.name}</h1>
 
           <div className="flex flex-wrap items-center gap-2 mb-4">
+            <ProjectTypeBadge projectType={project.projectType} />
             <TypeBadge type={project.type} />
             <StatusBadge status={project.status} />
             <PriorityBadge priority={project.priority} />

@@ -6,6 +6,7 @@ const projectSchema = z.object({
   name: z.string().min(1),
   description: z.string().default(''),
   type: z.string().min(1),
+  projectType: z.string().min(1),
   status: z.string().min(1),
   priority: z.string().min(1),
   effort: z.string().min(1),
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
     const project = await createProject(validatedData);
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
+    console.error('POST Project Error:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }

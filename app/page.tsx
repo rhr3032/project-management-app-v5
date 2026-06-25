@@ -8,22 +8,28 @@ import { ChartByStatus } from '@/components/dashboard/chart-by-status';
 import { ChartByType } from '@/components/dashboard/chart-by-type';
 import { CriticalItems } from '@/components/dashboard/critical-items';
 import { RecentProjects } from '@/components/dashboard/recent-projects';
+import { AnalyticsCharts } from '@/components/dashboard/analytics-charts';
 import { DashboardStats, ProjectsByStatus, ProjectsByType } from '@/types';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [byStatus, setByStatus] = useState<ProjectsByStatus[]>([]);
   const [byType, setByType] = useState<ProjectsByType[]>([]);
+  const [byPriority, setByPriority] = useState<any[]>([]);
+  const [monthlyTrend, setMonthlyTrend] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchDashboardData() {
       try {
         const res = await fetch('/api/dashboard');
+        if (!res.ok) throw new Error('Failed to fetch dashboard data');
         const data = await res.json();
-        setStats(data.stats);
-        setByStatus(data.byStatus);
-        setByType(data.byType);
+        setStats(data.stats || null);
+        setByStatus(data.byStatus || []);
+        setByType(data.byType || []);
+        setByPriority(data.byPriority || []);
+        setMonthlyTrend(data.monthlyTrend || []);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
@@ -69,6 +75,9 @@ export default function Dashboard() {
         <StatCard title="CRITICAL" value={stats?.criticalPriority || 0} icon={<AlertTriangle size={20} />} color="red" />
       </div>
 
+      {/* Analytics Visualization (Recharts) */}
+      <AnalyticsCharts monthlyTrend={monthlyTrend} byPriority={byPriority} />
+
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="glass-card p-6 animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
@@ -76,7 +85,7 @@ export default function Dashboard() {
           <ChartByStatus data={byStatus} />
         </div>
         <div className="glass-card p-6 animate-fadeInUp" style={{ animationDelay: '0.15s' }}>
-          <h2 className="text-xs font-bold text-muted-foreground mb-4 uppercase tracking-wider">By Type</h2>
+          <h2 className="text-xs font-bold text-muted-foreground mb-4 uppercase tracking-wider">By Project Type</h2>
           <ChartByType data={byType} />
         </div>
         <div className="glass-card p-6 animate-fadeInUp" style={{ animationDelay: '0.2s' }}>

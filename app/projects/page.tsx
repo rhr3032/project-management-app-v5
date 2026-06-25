@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Plus, Search, Eye, Pencil, Trash2, Calendar, User, Building2 } from 'lucide-react';
 import { Project } from '@/types';
-import { StatusBadge, TypeBadge, PriorityBadge, DeviceBadge } from '@/components/badges';
+import { StatusBadge, TypeBadge, ProjectTypeBadge, PriorityBadge, DeviceBadge } from '@/components/badges';
 import { ConfirmDialog } from '@/components/confirm-dialog';
 
 const ALL_STATUSES = [
@@ -14,13 +14,44 @@ const ALL_STATUSES = [
   'Needs Revision','In Testing','Ready for Deployment','Deployed','Maintenance','Closed',
 ];
 
-const ALL_TYPES = [
-  'All Types','UI/UX Design','Website','Web App','Mobile App','Logo','Branding',
-  'Illustration','Marketing Material','Video Production','Photography','Content Creation',
-  'SEO','Social Media Campaign','Email Campaign','Print Design','Packaging Design',
-  '3D Modeling','Animation','Game Development','AR/VR Experience','IoT Project',
-  'AI/ML Project','Data Visualization','E-commerce Platform','SaaS Product',
-  'Enterprise Software','Open Source Contribution','Research Project',
+const ALL_PROJECT_TYPES = ['All Project Types', 'UI/UX Design', 'Web Development', 'Mobile App Development'] as const;
+
+const CATEGORIES_BY_TYPE = {
+  'UI/UX Design': [
+    'UI/UX Design', 'Logo', 'Branding', 'Illustration', 'Marketing Material',
+    'Video Production', 'Photography', 'Content Creation', 'Social Media Campaign',
+    'Email Campaign', 'Print Design', 'Packaging Design', '3D Modeling', 'Animation',
+    'Research Project', 'Wireframe', 'Prototyping', 'Design System', 'User Research',
+    'Mobile UI Design', 'Web UI Design', 'Icon Set',
+    'Design Audit', 'Typography System', 'Pitch Deck', 'Newsletter Template', 'Style Guide',
+    'Motion Graphics', 'Infographic Design', 'Persona Creation', 'Journey Mapping', 'Site Mapping',
+    'Information Architecture', 'Usability Testing', 'Interactive Prototype', 'Poster Design', 'Billboard Design',
+    'Brochure Design', 'Card Design', 'Vector Art', 'Matte Painting', 'Storyboarding'
+  ],
+  'Web Development': [
+    'Website', 'Web App', 'E-commerce Platform', 'SaaS Product', 'Enterprise Software',
+    'SEO', 'Data Visualization', 'Open Source Contribution', 'Dashboard', 'ERP Software',
+    'LMS Platform', 'CMS Platform', 'Full-Stack App', 'API Integration', 'Landing Page', 'Web Portal',
+    'Headless CMS', 'Serverless App', 'Progressive Web App (PWA)', 'Single Page App (SPA)', 'Static Site Generator',
+    'E-Learning Hub', 'Real-time Chat App', 'CRM Integration', 'Payment Gateway Integration', 'GraphQL API',
+    'RESTful API', 'Web Scraper', 'Devops Setup', 'Docker Deployment', 'Cloud Migration',
+    'WebSockets Integration', 'Web Accessibility (a11y)', 'Site Security Audit', 'Performance Optimization', 'Database Migration'
+  ],
+  'Mobile App Development': [
+    'Mobile App', 'AR/VR Experience', 'IoT Project', 'AI/ML Project', 'Game Development',
+    'iOS App', 'Android App', 'Cross-Platform App', 'Flutter App', 'React Native App', 'Wearable App',
+    'Mobile Game', 'Bluetooth Integration', 'Push Notification Service', 'Mobile Analytics', 'Native iOS Dev',
+    'Native Android Dev', 'App Store Optimization (ASO)', 'SQLite Integration', 'CoreML Integration', 'TensorFlow Lite',
+    'Location Services (GPS)', 'HealthKit Integration', 'Apple Watch App', 'Android Wear App', 'Hybrid App',
+    'Cordova App', 'Capacitor App', 'App Payment System', 'Firebase Integration', 'Mobile Security System'
+  ]
+} as const;
+
+const ALL_CATEGORIES = [
+  'All Categories',
+  ...CATEGORIES_BY_TYPE['UI/UX Design'],
+  ...CATEGORIES_BY_TYPE['Web Development'],
+  ...CATEGORIES_BY_TYPE['Mobile App Development']
 ];
 
 const ALL_PRIORITIES = [
@@ -45,7 +76,8 @@ export default function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
-  const [typeFilter, setTypeFilter] = useState('All Types');
+  const [projectTypeFilter, setProjectTypeFilter] = useState('All Project Types');
+  const [categoryFilter, setCategoryFilter] = useState('All Categories');
   const [priorityFilter, setPriorityFilter] = useState('All Priorities');
   const [deviceFilter, setDeviceFilter] = useState('All Devices');
   const [sortBy, setSortBy] = useState('Newest First');
@@ -71,6 +103,20 @@ export default function ProjectsPage() {
     }
   }
 
+  const availableCategories = projectTypeFilter === 'All Project Types'
+    ? ALL_CATEGORIES
+    : ['All Categories', ...CATEGORIES_BY_TYPE[projectTypeFilter as keyof typeof CATEGORIES_BY_TYPE]];
+
+  const handleProjectTypeFilterChange = (val: string) => {
+    setProjectTypeFilter(val);
+    if (val !== 'All Project Types') {
+      const allowed = CATEGORIES_BY_TYPE[val as keyof typeof CATEGORIES_BY_TYPE];
+      if (categoryFilter !== 'All Categories' && !allowed.includes(categoryFilter as any)) {
+        setCategoryFilter('All Categories');
+      }
+    }
+  };
+
   useEffect(() => {
     let filtered = [...projects];
 
@@ -84,7 +130,8 @@ export default function ProjectsPage() {
       );
     }
     if (statusFilter !== 'All Statuses') filtered = filtered.filter(p => p.status === statusFilter);
-    if (typeFilter !== 'All Types') filtered = filtered.filter(p => p.type === typeFilter);
+    if (projectTypeFilter !== 'All Project Types') filtered = filtered.filter(p => p.projectType === projectTypeFilter);
+    if (categoryFilter !== 'All Categories') filtered = filtered.filter(p => p.type === categoryFilter);
     if (priorityFilter !== 'All Priorities') filtered = filtered.filter(p => p.priority === priorityFilter);
     if (deviceFilter !== 'All Devices') filtered = filtered.filter(p => p.device === deviceFilter);
 
@@ -94,7 +141,7 @@ export default function ProjectsPage() {
     else if (sortBy === 'Name Z-A') filtered.sort((a, b) => b.name.localeCompare(a.name));
 
     setFilteredProjects(filtered);
-  }, [projects, searchTerm, statusFilter, typeFilter, priorityFilter, deviceFilter, sortBy]);
+  }, [projects, searchTerm, statusFilter, projectTypeFilter, categoryFilter, priorityFilter, deviceFilter, sortBy]);
 
   const openDeleteDialog = (e: React.MouseEvent, project: Project) => {
     e.preventDefault(); e.stopPropagation();
@@ -155,8 +202,12 @@ export default function ProjectsPage() {
             {ALL_STATUSES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
-          <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)} className={selectClass}>
-            {ALL_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+          <select value={projectTypeFilter} onChange={e => handleProjectTypeFilterChange(e.target.value)} className={selectClass}>
+            {ALL_PROJECT_TYPES.map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+
+          <select value={categoryFilter} onChange={e => setCategoryFilter(e.target.value)} className={selectClass}>
+            {availableCategories.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
           <select value={priorityFilter} onChange={e => setPriorityFilter(e.target.value)} className={selectClass}>
@@ -216,6 +267,7 @@ export default function ProjectsPage() {
 
                   {/* Badges */}
                   <div className="flex items-center gap-2 flex-wrap mb-3">
+                    <ProjectTypeBadge projectType={project.projectType} />
                     <TypeBadge type={project.type} />
                     <StatusBadge status={project.status} />
                     <PriorityBadge priority={project.priority} />

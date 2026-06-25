@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { Plus, Calendar, User, TrendingUp } from 'lucide-react';
 import { Project, ProjectStatus } from '@/types';
-import { TypeBadge, PriorityBadge } from '@/components/badges';
+import { TypeBadge, ProjectTypeBadge, PriorityBadge } from '@/components/badges';
 
 const ALL_STATUSES: ProjectStatus[] = [
   'Research','Planning','In Progress','Review','On Hold','Completed',
@@ -125,9 +125,9 @@ export default function BoardPage() {
   const totalProjects = projects.length;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="h-full flex flex-col overflow-hidden">
       {/* Sticky Header */}
-      <div className="glass-header sticky top-0 z-20 px-4 md:px-8 py-4">
+      <div className="glass-header sticky top-0 z-20 px-4 md:px-8 py-4 flex-shrink-0">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
@@ -147,8 +147,8 @@ export default function BoardPage() {
       </div>
 
       {/* Board */}
-      <div ref={boardRef} className="kanban-scroll flex-1 px-4 md:px-6 pb-8 pt-4">
-        <div className="flex gap-4" style={{ minWidth: `${ALL_STATUSES.length * 296}px` }}>
+      <div ref={boardRef} className="kanban-scroll flex-1 px-4 md:px-6 pb-8 pt-4 overflow-y-hidden flex flex-col">
+        <div className="flex gap-4 flex-1 h-full pb-2" style={{ minWidth: `${ALL_STATUSES.length * 296}px` }}>
           {ALL_STATUSES.map((status, colIdx) => {
             const config = STATUS_CONFIG[status];
             const statusProjects = projectsByStatus[status];
@@ -157,11 +157,11 @@ export default function BoardPage() {
             return (
               <div
                 key={status}
-                className="flex-shrink-0 w-72 flex flex-col animate-slideInLeft"
+                className="flex-shrink-0 w-72 flex flex-col h-full animate-slideInLeft"
                 style={{ animationDelay: `${colIdx * 40}ms` }}
               >
                 {/* Column Header */}
-                <div className={`mb-3 p-3 rounded-xl border ${config.accent} transition-all`}>
+                <div className={`mb-3 p-3 rounded-xl border ${config.accent} transition-all flex-shrink-0`}>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <span className="text-base">{config.icon}</span>
@@ -175,7 +175,7 @@ export default function BoardPage() {
 
                 {/* Drop Zone */}
                 <div
-                  className={`flex-1 min-h-[500px] rounded-xl border-2 transition-all p-2.5 space-y-3 ${
+                  className={`flex-1 overflow-y-auto rounded-xl border-2 transition-all p-2.5 space-y-3 ${
                     isDragTarget
                       ? `border-dashed ${config.accent} shadow-lg`
                       : 'border-transparent bg-white/[0.02]'
@@ -218,6 +218,7 @@ export default function BoardPage() {
                         </Link>
 
                         <div className="flex flex-wrap gap-1.5 mb-3">
+                          <ProjectTypeBadge projectType={project.projectType} />
                           <TypeBadge type={project.type} />
                           <PriorityBadge priority={project.priority} />
                         </div>

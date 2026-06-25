@@ -6,6 +6,7 @@ const updateProjectSchema = z.object({
   name: z.string().min(1).optional(),
   description: z.string().optional(),
   type: z.string().min(1).optional(),
+  projectType: z.string().min(1).optional(),
   status: z.string().min(1).optional(),
   priority: z.string().min(1).optional(),
   effort: z.string().min(1).optional(),
@@ -55,6 +56,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       ? NextResponse.json(project)
       : NextResponse.json({ error: 'Project not found' }, { status: 404 });
   } catch (error) {
+    console.error('PATCH Project Error:', error);
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.issues }, { status: 400 });
     }

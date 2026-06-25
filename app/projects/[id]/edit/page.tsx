@@ -13,13 +13,39 @@ const PROJECT_STATUSES = [
   'In Testing','Ready for Deployment','Deployed','Maintenance','Closed',
 ];
 const PROJECT_TYPES = [
-  'UI/UX Design','Website','Web App','Mobile App','Logo','Branding','Illustration',
-  'Marketing Material','Video Production','Photography','Content Creation','SEO',
-  'Social Media Campaign','Email Campaign','Print Design','Packaging Design',
-  '3D Modeling','Animation','Game Development','AR/VR Experience','IoT Project',
-  'AI/ML Project','Data Visualization','E-commerce Platform','SaaS Product',
-  'Enterprise Software','Open Source Contribution','Research Project',
-];
+  'UI/UX Design', 'Web Development', 'Mobile App Development'
+] as const;
+
+const CATEGORIES_BY_TYPE = {
+  'UI/UX Design': [
+    'UI/UX Design', 'Logo', 'Branding', 'Illustration', 'Marketing Material',
+    'Video Production', 'Photography', 'Content Creation', 'Social Media Campaign',
+    'Email Campaign', 'Print Design', 'Packaging Design', '3D Modeling', 'Animation',
+    'Research Project', 'Wireframe', 'Prototyping', 'Design System', 'User Research',
+    'Mobile UI Design', 'Web UI Design', 'Icon Set',
+    'Design Audit', 'Typography System', 'Pitch Deck', 'Newsletter Template', 'Style Guide',
+    'Motion Graphics', 'Infographic Design', 'Persona Creation', 'Journey Mapping', 'Site Mapping',
+    'Information Architecture', 'Usability Testing', 'Interactive Prototype', 'Poster Design', 'Billboard Design',
+    'Brochure Design', 'Card Design', 'Vector Art', 'Matte Painting', 'Storyboarding'
+  ],
+  'Web Development': [
+    'Website', 'Web App', 'E-commerce Platform', 'SaaS Product', 'Enterprise Software',
+    'SEO', 'Data Visualization', 'Open Source Contribution', 'Dashboard', 'ERP Software',
+    'LMS Platform', 'CMS Platform', 'Full-Stack App', 'API Integration', 'Landing Page', 'Web Portal',
+    'Headless CMS', 'Serverless App', 'Progressive Web App (PWA)', 'Single Page App (SPA)', 'Static Site Generator',
+    'E-Learning Hub', 'Real-time Chat App', 'CRM Integration', 'Payment Gateway Integration', 'GraphQL API',
+    'RESTful API', 'Web Scraper', 'Devops Setup', 'Docker Deployment', 'Cloud Migration',
+    'WebSockets Integration', 'Web Accessibility (a11y)', 'Site Security Audit', 'Performance Optimization', 'Database Migration'
+  ],
+  'Mobile App Development': [
+    'Mobile App', 'AR/VR Experience', 'IoT Project', 'AI/ML Project', 'Game Development',
+    'iOS App', 'Android App', 'Cross-Platform App', 'Flutter App', 'React Native App', 'Wearable App',
+    'Mobile Game', 'Bluetooth Integration', 'Push Notification Service', 'Mobile Analytics', 'Native iOS Dev',
+    'Native Android Dev', 'App Store Optimization (ASO)', 'SQLite Integration', 'CoreML Integration', 'TensorFlow Lite',
+    'Location Services (GPS)', 'HealthKit Integration', 'Apple Watch App', 'Android Wear App', 'Hybrid App',
+    'Cordova App', 'Capacitor App', 'App Payment System', 'Firebase Integration', 'Mobile Security System'
+  ]
+} as const;
 const PROJECT_PRIORITIES = [
   'Low','Medium','High','Critical','Urgent','Immediate','Important','Optional',
   'Backlog','Future','Long-term','Short-term','Strategic','Tactical','Operational',
@@ -67,7 +93,18 @@ export default function EditProjectPage() {
         const res = await fetch(`/api/projects/${projectId}`);
         if (!res.ok) { router.push('/projects'); return; }
         const project: Project = await res.json();
+        let matchedProjectType = project.projectType;
+        if (!matchedProjectType) {
+          matchedProjectType = 'Web Development'; // default fallback
+          for (const [pType, categories] of Object.entries(CATEGORIES_BY_TYPE)) {
+            if (categories.includes(project.type)) {
+              matchedProjectType = pType as any;
+              break;
+            }
+          }
+        }
         setFormData({
+          projectType: matchedProjectType,
           ...project,
           tags: Array.isArray(project.tags) ? project.tags.join(', ') : '',
         });
@@ -81,7 +118,12 @@ export default function EditProjectPage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    if (name === 'projectType') {
+      const defaultCategory = CATEGORIES_BY_TYPE[value as keyof typeof CATEGORIES_BY_TYPE][0];
+      setFormData(prev => ({ ...prev, projectType: value as any, type: defaultCategory }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -103,7 +145,7 @@ export default function EditProjectPage() {
     finally { setSaving(false); }
   };
 
-  const SelectField = ({ name, label, options }: { name: string; label: string; options: string[] }) => (
+  const SelectField = ({ name, label, options = [] }: { name: string; label: string; options?: readonly string[] | string[] }) => (
     <div>
       <label className={labelClass}>{label}</label>
       <select name={name} value={(formData as Record<string,string>)[name] || ''} onChange={handleInputChange} className={formFieldClass}>
@@ -149,8 +191,9 @@ export default function EditProjectPage() {
                 <input type="text" name="name" value={formData.name || ''} onChange={handleInputChange}
                   placeholder="Project name" className={formFieldClass} required />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <SelectField name="type" label="Project Type" options={PROJECT_TYPES} />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <SelectField name="projectType" label="Project Type" options={PROJECT_TYPES as unknown as string[]} />
+                <SelectField name="type" label="Category" options={CATEGORIES_BY_TYPE[formData.projectType as keyof typeof CATEGORIES_BY_TYPE] || []} />
                 <SelectField name="status" label="Project Status" options={PROJECT_STATUSES} />
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

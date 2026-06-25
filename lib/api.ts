@@ -17,12 +17,7 @@ const dashboardStatuses = [
   'Needs Revision','In Testing','Ready for Deployment','Deployed','Maintenance','Closed',
 ];
 const dashboardTypes = [
-  'UI/UX Design','Website','Web App','Mobile App','Logo','Branding','Illustration',
-  'Marketing Material','Video Production','Photography','Content Creation','SEO',
-  'Social Media Campaign','Email Campaign','Print Design','Packaging Design',
-  '3D Modeling','Animation','Game Development','AR/VR Experience','IoT Project',
-  'AI/ML Project','Data Visualization','E-commerce Platform','SaaS Product',
-  'Enterprise Software','Open Source Contribution','Research Project',
+  'UI/UX Design', 'Web Development', 'Mobile App Development'
 ];
 
 function toStringArray(value: Prisma.JsonValue): string[] {
@@ -162,16 +157,62 @@ export async function getProjectsByStatus(): Promise<ProjectsByStatus[]> {
 
 export async function getProjectsByType(): Promise<ProjectsByType[]> {
   const grouped = await getPrisma().project.groupBy({
-    by: ['type'],
-    _count: { type: true },
+    by: ['projectType'],
+    _count: { projectType: true },
   });
 
   return dashboardTypes.map((type) => ({
     type: type as ProjectsByType['type'],
-    count: grouped.find((item) => item.type === type)?._count.type ?? 0,
+    count: grouped.find((item) => item.projectType === type)?._count.projectType ?? 0,
   }));
 }
 
 export async function updateProjectStatus(id: string, status: string): Promise<Project | null> {
   return updateProject(id, { status });
+}
+
+export async function getProjectsByPriority() {
+  const grouped = await getPrisma().project.groupBy({
+    by: ['priority'],
+    _count: { priority: true },
+  });
+
+  const priorities = ['Low', 'Medium', 'High', 'Critical'];
+  return priorities.map((p) => ({
+    priority: p,
+    count: grouped.find((item) => item.priority === p)?._count.priority ?? 0,
+  }));
+}
+
+export async function getProjectsMonthlyTrend() {
+  const prisma = getPrisma();
+  const projects = await prisma.project.findMany({
+    select: { createdAt: true },
+  });
+
+  const monthlyCounts: Record<string, number> = {};
+  const months = [];
+
+  // Generate last 6 months list
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date();
+    d.setMonth(d.getMonth() - i);
+    const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    months.push({ key, label });
+    monthlyCounts[key] = 0;
+  }
+
+  projects.forEach((p) => {
+    const d = new Date(p.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+    if (monthlyCounts[key] !== undefined) {
+      monthlyCounts[key]++;
+    }
+  });
+
+  return months.map((m) => ({
+    month: m.label,
+    projects: monthlyCounts[m.key],
+  }));
 }
