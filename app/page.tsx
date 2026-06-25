@@ -9,6 +9,7 @@ import { ChartByType } from '@/components/dashboard/chart-by-type';
 import { CriticalItems } from '@/components/dashboard/critical-items';
 import { RecentProjects } from '@/components/dashboard/recent-projects';
 import { AnalyticsCharts } from '@/components/dashboard/analytics-charts';
+import { StatusAnalyticsChart } from '@/components/dashboard/status-analytics-chart';
 import { DashboardStats, ProjectsByStatus, ProjectsByType } from '@/types';
 
 export default function Dashboard() {
@@ -17,6 +18,7 @@ export default function Dashboard() {
   const [byType, setByType] = useState<ProjectsByType[]>([]);
   const [byPriority, setByPriority] = useState<any[]>([]);
   const [monthlyTrend, setMonthlyTrend] = useState<any[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -30,6 +32,7 @@ export default function Dashboard() {
         setByType(data.byType || []);
         setByPriority(data.byPriority || []);
         setMonthlyTrend(data.monthlyTrend || []);
+        setProjects(data.projects || []);
       } catch (err) {
         console.error('Failed to fetch dashboard data:', err);
       } finally {
@@ -68,15 +71,19 @@ export default function Dashboard() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
         <StatCard title="TOTAL PROJECTS" value={stats?.totalProjects || 0} icon={<TrendingUp size={20} />} color="indigo" />
         <StatCard title="IN PROGRESS" value={stats?.inProgress || 0} icon={<Clock size={20} />} color="orange" />
         <StatCard title="COMPLETED" value={stats?.completed || 0} icon={<CheckCircle2 size={20} />} color="green" />
         <StatCard title="CRITICAL" value={stats?.criticalPriority || 0} icon={<AlertTriangle size={20} />} color="red" />
+        <StatCard title="IMPORTANT" value={stats?.importantPriority || 0} icon={<AlertTriangle size={20} />} color="purple" />
       </div>
 
       {/* Analytics Visualization (Recharts) */}
-      <AnalyticsCharts monthlyTrend={monthlyTrend} byPriority={byPriority} />
+      <AnalyticsCharts monthlyTrend={monthlyTrend} byPriority={byPriority} projects={projects} />
+
+      {/* Full-width Status Analytics Chart */}
+      <StatusAnalyticsChart data={byStatus} projects={projects} />
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

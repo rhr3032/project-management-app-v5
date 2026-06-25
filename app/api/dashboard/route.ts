@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDashboardStats, getProjectsByStatus, getProjectsByType, getProjectsByPriority, getProjectsMonthlyTrend } from '@/lib/api';
+import { getPrisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
-    const [stats, byStatus, byType, byPriority, monthlyTrend] = await Promise.all([
+    const prisma = getPrisma();
+    const [stats, byStatus, byType, byPriority, monthlyTrend, projects] = await Promise.all([
       getDashboardStats(),
       getProjectsByStatus(),
       getProjectsByType(),
       getProjectsByPriority(),
       getProjectsMonthlyTrend(),
+      prisma.project.findMany({
+        select: {
+          id: true,
+          createdAt: true,
+          priority: true,
+          status: true,
+        },
+      }),
     ]);
 
     return NextResponse.json({
@@ -17,6 +27,10 @@ export async function GET(request: NextRequest) {
       byType,
       byPriority,
       monthlyTrend,
+      projects: projects.map(p => ({
+        ...p,
+        createdAt: p.createdAt.toISOString()
+      })),
     });
   } catch (error) {
     console.error('Dashboard Stats API Error:', error);

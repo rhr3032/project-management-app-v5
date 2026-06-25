@@ -40,6 +40,8 @@ function PriorityBadge({ priority }: { priority: ProjectPriority }) {
     'Strategic':     { bg: 'bg-purple-500/12 border border-purple-500/20', text: 'text-purple-400' },
     'Key Initiative':{ bg: 'bg-indigo-500/12 border border-indigo-500/20', text: 'text-indigo-400' },
     'Quick Win':     { bg: 'bg-green-500/12 border border-green-500/20',  text: 'text-green-400' },
+    'Major':         { bg: 'bg-violet-500/12 border border-violet-500/20', text: 'text-violet-400' },
+    'Minor':         { bg: 'bg-cyan-500/12 border border-cyan-500/20',   text: 'text-cyan-400' },
   };
   const { bg, text } = colors[priority] || { bg: 'bg-white/8 border border-white/12', text: 'text-muted-foreground' };
   return <span className={`px-2 py-0.5 rounded-md text-xs font-semibold ${bg} ${text}`}>{priority}</span>;
@@ -71,7 +73,7 @@ function TypeBadge({ type }: { type: string }) {
     'Dashboard':              { bg: 'bg-blue-500/12 border border-blue-500/20',      text: 'text-blue-400' },
     'ERP Software':           { bg: 'bg-indigo-500/12 border border-indigo-500/20',  text: 'text-indigo-400' },
     'LMS Platform':           { bg: 'bg-violet-500/12 border border-violet-500/20',  text: 'text-violet-400' },
-    'CMS Platform':           { bg: 'bg-teal-500/12 border border-teal-500/20',      text: 'text-teal-400' },
+    'CMS System':             { bg: 'bg-teal-500/12 border border-teal-500/20',      text: 'text-teal-400' },
     'Landing Page':           { bg: 'bg-sky-500/12 border border-sky-500/20',        text: 'text-sky-400' },
     'API Integration':        { bg: 'bg-yellow-500/12 border border-yellow-500/20',  text: 'text-yellow-400' },
 
@@ -81,11 +83,46 @@ function TypeBadge({ type }: { type: string }) {
     'IoT Project':            { bg: 'bg-indigo-500/12 border border-indigo-500/20',  text: 'text-indigo-400' },
     'AI/ML Project':          { bg: 'bg-violet-500/12 border border-violet-500/20',  text: 'text-violet-400' },
     'Game Development':       { bg: 'bg-rose-500/12 border border-rose-500/20',      text: 'text-rose-400' },
-    'iOS App':                { bg: 'bg-purple-500/12 border border-purple-500/20',  text: 'text-purple-400' },
-    'Android App':            { bg: 'bg-green-500/12 border border-green-500/20',    text: 'text-green-400' },
-    'Cross-Platform App':     { bg: 'bg-cyan-500/12 border border-cyan-500/20',      text: 'text-cyan-400' },
+    'iOS Application':        { bg: 'bg-purple-500/12 border border-purple-500/20',  text: 'text-purple-400' },
+    'Android Application':    { bg: 'bg-green-500/12 border border-green-500/20',    text: 'text-green-400' },
+    'Cross-Platform Application': { bg: 'bg-cyan-500/12 border border-cyan-500/20',    text: 'text-cyan-400' },
     'Flutter App':            { bg: 'bg-sky-500/12 border border-sky-500/20',        text: 'text-sky-400' },
     'React Native App':       { bg: 'bg-blue-500/12 border border-blue-500/20',      text: 'text-blue-400' },
+
+    // Website Categories (expanded)
+    'Website Design':           { bg: 'bg-sky-500/12 border border-sky-500/20',        text: 'text-sky-400' },
+    'Corporate Website Design': { bg: 'bg-sky-500/12 border border-sky-500/20',        text: 'text-sky-400' },
+    'Business Website Design':  { bg: 'bg-blue-500/12 border border-blue-500/20',      text: 'text-blue-400' },
+    'Portfolio Website Design': { bg: 'bg-indigo-500/12 border border-indigo-500/20',  text: 'text-indigo-400' },
+    'Landing Page Design':      { bg: 'bg-violet-500/12 border border-violet-500/20',  text: 'text-violet-400' },
+    'E-commerce Website Design':{ bg: 'bg-orange-500/12 border border-orange-500/20',  text: 'text-orange-400' },
+    'Marketplace Design':       { bg: 'bg-pink-500/12 border border-pink-500/20',      text: 'text-pink-400' },
+    'SaaS Website':             { bg: 'bg-teal-500/12 border border-teal-500/20',      text: 'text-teal-400' },
+    'Blog Website':             { bg: 'bg-emerald-500/12 border border-emerald-500/20', text: 'text-emerald-400' },
+    'News Portal Website':      { bg: 'bg-rose-500/12 border border-rose-500/20',      text: 'text-rose-400' },
+    'Educational Website':      { bg: 'bg-amber-500/12 border border-amber-500/20',    text: 'text-amber-400' },
+    'Directory Website':        { bg: 'bg-cyan-500/12 border border-cyan-500/20',      text: 'text-cyan-400' },
+    'Membership Website':       { bg: 'bg-purple-500/12 border border-purple-500/20',  text: 'text-purple-400' },
+    'Booking Platform':         { bg: 'bg-fuchsia-500/12 border border-fuchsia-500/20', text: 'text-fuchsia-400' },
+    'Real Estate Website':      { bg: 'bg-indigo-500/12 border border-indigo-500/20',  text: 'text-indigo-400' },
+    'Healthcare Website':       { bg: 'bg-green-500/12 border border-green-500/20',    text: 'text-green-400' },
+    'Event Website':            { bg: 'bg-yellow-500/12 border border-yellow-500/20',  text: 'text-yellow-400' },
+
+    // Software Categories (expanded)
+    'CRM Platform':             { bg: 'bg-blue-500/12 border border-blue-500/20',      text: 'text-blue-400' },
+    'HRM Software':             { bg: 'bg-pink-500/12 border border-pink-500/20',      text: 'text-pink-400' },
+    'POS System':               { bg: 'bg-rose-500/12 border border-rose-500/20',      text: 'text-rose-400' },
+    'Inventory Management System': { bg: 'bg-orange-500/12 border border-orange-500/20', text: 'text-orange-400' },
+    'Project Management System': { bg: 'bg-amber-500/12 border border-amber-500/20',   text: 'text-amber-400' },
+    'Enterprise Portal':        { bg: 'bg-indigo-500/12 border border-indigo-500/20',  text: 'text-indigo-400' },
+    'Customer Portal':          { bg: 'bg-cyan-500/12 border border-cyan-500/20',      text: 'text-cyan-400' },
+
+    // Mobile App Categories (expanded)
+    'Mobile App UI Design':     { bg: 'bg-pink-500/12 border border-pink-500/20',      text: 'text-pink-400' },
+    'Tablet Application':       { bg: 'bg-blue-500/12 border border-blue-500/20',      text: 'text-blue-400' },
+    'SaaS Mobile Application':  { bg: 'bg-teal-500/12 border border-teal-500/20',      text: 'text-teal-400' },
+    'E-commerce Mobile Application': { bg: 'bg-orange-500/12 border border-orange-500/20', text: 'text-orange-400' },
+    'Business Mobile Application': { bg: 'bg-sky-500/12 border border-sky-500/20',     text: 'text-sky-400' },
   };
   const { bg, text } = colors[type] || { bg: 'bg-white/8 border border-white/12', text: 'text-muted-foreground' };
   return <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${bg} ${text}`}>{type}</span>;

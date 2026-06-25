@@ -128,11 +128,12 @@ export async function deleteProject(id: string): Promise<boolean> {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const prisma = getPrisma();
-  const [totalProjects, inProgress, completed, criticalPriority] = await Promise.all([
+  const [totalProjects, inProgress, completed, criticalPriority, importantPriority] = await Promise.all([
     prisma.project.count(),
     prisma.project.count({ where: { status: 'In Progress' } }),
     prisma.project.count({ where: { status: 'Completed' } }),
     prisma.project.count({ where: { priority: 'Critical' } }),
+    prisma.project.count({ where: { priority: 'Important' } }),
   ]);
 
   return {
@@ -140,6 +141,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     inProgress,
     completed,
     criticalPriority,
+    importantPriority,
   };
 }
 
@@ -177,7 +179,7 @@ export async function getProjectsByPriority() {
     _count: { priority: true },
   });
 
-  const priorities = ['Low', 'Medium', 'High', 'Critical'];
+  const priorities = ['Critical', 'Urgent', 'Immediate', 'High', 'Important', 'Major', 'Medium', 'Minor', 'Low', 'Optional', 'Backlog', 'Strategic', 'Key Initiative', 'Quick Win'];
   return priorities.map((p) => ({
     priority: p,
     count: grouped.find((item) => item.priority === p)?._count.priority ?? 0,

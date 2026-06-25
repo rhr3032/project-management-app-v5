@@ -1,225 +1,148 @@
 # Project Hub - Project Management Web App
 
-A comprehensive project management application built with Next.js, Express, and designed to match the exact UI/UX specifications provided.
+A modern, high-performance project management application built with Next.js and Prisma ORM, featuring a gorgeous dark glassmorphic user interface.
 
-## Features
+## Core Features
 
-- **Dashboard** - Overview of all projects with statistics and charts
-  - Total Projects, In Progress, Completed, and Critical Priority counts
-  - By Status chart showing project distribution
-  - By Type chart showing design/web/mobile breakdown
-  - Critical Items list
-  - Recent Projects preview
+### 1. Dashboard Overview
+- **Metrics Grid** - 5 key metrics cards with live counts:
+  - **Total Projects**
+  - **In Progress Projects**
+  - **Completed Projects**
+  - **Critical Priority Projects**
+  - **Important Priority Projects** (added statistics card)
+- **Project Velocity (Daily Trends)** - Interactive area chart detailing daily created, completed, and closed projects.
+  - Supports separate **Month and Year filters** that dynamically fetch daily data.
+  - X-axis renders all day ticks cleanly.
+- **Priority Distribution (Projects by Priority)** - Dynamic bar chart displaying project counts for key priorities:
+  - Displays exactly 8 sorted priorities: `Critical`, `Urgent`, `High`, `Important`, `Major`, `Minor`, `Low`, and `Quick Win`.
+  - Supports separate **Month and Year filters** that run instant client-side updates.
+- **Status Distribution (Projects by Status)** - Full-width dynamic bar chart tracking workflow progression.
+  - Displays exactly 14 target statuses: `Research`, `In Progress`, `Review`, `On Hold`, `Completed`, `Cancelled`, `Pending Approval`, `Approved`, `Rejected`, `In Testing`, `Needs Revision`, `Maintenance`, `Deployed`, and `Ready for Deployment`.
+  - Supports separate **Month and Year filters** with instant client-side re-aggregation.
 
-- **Projects List** - Full project listing with powerful filtering and search
-  - Search by project name or description
-  - Filter by Status, Type, Priority, and Device
-  - Sort by newest or oldest first
-  - Full project cards with badges and metadata
+### 2. Projects List & Filtering
+- Interactive list layout showing project cards with badges, metadata, and tags.
+- Search by project name, description, or **Creator Name** (formerly Owner Name).
+- Powerful dropdown filters for **Project Type**, **Category**, **Priority**, and **Device**.
+- Sort options by newest or oldest project first.
 
-- **New Project Form** - Create projects with comprehensive information
-  - Project Info (name, type, status, priority, effort, device, owner)
-  - Dates (start, end, deadline)
-  - Client Information (name, email/phone)
-  - Links (preview link and resource links)
-  - Project Strategy (overview, business goal, target audience, competitors)
-  - Tags support
+### 3. Project Creation & Editing
+- Comprehensive multi-section forms for adding and modifying projects:
+  - **Standard Fields** - Name, Category, High-level Type, Status, Priority, Effort, and Device.
+  - **Creator Name** - Renamed from Owner Name across the application.
+  - **Client Information** - Client Name, Email, Phone, and **Client Address** (text input).
+  - **Industry** - Required dropdown selection mapped to 38 sorted options.
+  - **Resource Links** - Dynamic URL and Title fields.
+  - **Project Strategy (WYSIWYG)** - Interactive rich-text editors powered by TipTap for editing *Short Overview*, *Business Goal*, *Target Audience*, and *Competitors*.
 
-- **Project Details** - View complete project information
-  - All project metadata in organized sections
-  - External links handling
-  - Formatted dates and client contact info
-  - Full strategy and context
+### 4. Kanban Board
+- Visual project pipeline grouped into columns by status.
+- Cards show priorities, creators, tags, and formatted deadlines.
 
-- **Kanban Board** - Visual project organization by status
-  - 5 status columns: Planning, In Progress, Review, On Hold, Completed
-  - Project cards with key information
-  - Status-based organization
-
-- **Sidebar Navigation** - Easy access to all sections
-  - Dashboard, Projects, Board links
-  - Badge showing project counts
-  - New Project button
-  - Dark Mode toggle (placeholder)
+---
 
 ## Tech Stack
 
-### Frontend
-- **Next.js 16** with App Router
-- **React 19.2** with latest hooks
-- **Tailwind CSS v4** for styling
-- **TypeScript** for type safety
-- **Lucide React** for icons
+### Frontend & App Framework
+- **Next.js 16** (App Router with Turbopack)
+- **React 19**
+- **Tailwind CSS v4** (Modern utilities and glassmorphic UI design)
+- **Recharts** (Interactive charting library)
+- **TipTap** (Rich text editing system)
+- **Lucide React** (Modern SVG icon system)
 
-### Backend
-- **Express.js** (ready for integration)
-- **Node.js** runtime
-- **Zod** for schema validation
+### Backend & Database
+- **Next.js Route Handlers** (API Endpoints)
+- **Prisma ORM** (Database schema management & queries)
+- **Neon PostgreSQL** (Serverless cloud database provider)
+- **Zod** (Request payload validation)
+- **Bcryptjs** (Password hashing)
 
-### Database (Ready for Integration)
-- **Neon PostgreSQL** - Add `DATABASE_URL` to `.env` when ready
-- **Drizzle ORM** - Configured and ready
-- Mock data service currently used (swappable)
+---
 
-## Project Structure
+## Database Integration
 
-```
-app/
-├── layout.tsx           # Root layout with sidebar
-├── page.tsx            # Dashboard page
-├── api/
-│   ├── dashboard/      # Dashboard data endpoints
-│   └── projects/       # Projects CRUD endpoints
-├── projects/
-│   ├── page.tsx        # Projects list
-│   ├── new/
-│   │   └── page.tsx    # New project form
-│   └── [id]/
-│       └── page.tsx    # Project details
-└── board/
-    └── page.tsx        # Kanban board
+The application is fully integrated with PostgreSQL. The database schema in prisma/schema.prisma maps the logical `creatorName` to the underlying PostgreSQL `owner` column using `@map("owner")` to maintain full database backward compatibility.
 
-components/
-├── sidebar.tsx         # Main navigation sidebar
-├── badges.tsx          # Status, Priority, Type badges
-└── dashboard/
-    ├── stat-card.tsx
-    ├── chart-by-status.tsx
-    ├── chart-by-type.tsx
-    ├── critical-items.tsx
-    └── recent-projects.tsx
+### Setting Up Environment Variables
 
-types/
-└── index.ts           # TypeScript types and interfaces
+Create a `.env.local` file in the project root:
 
-lib/
-├── api.ts             # API utilities and mock data
-└── utils.ts           # Utility functions
+```env
+# Neon PostgreSQL Connection String
+DATABASE_URL="postgresql://username:password@hostname/neondb?sslmode=require"
+
+# API URL Configuration
+NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-## Design System
+### Syncing the Database
 
-### Colors
-- **Primary**: #FF8C42 (Orange) - Main brand color
-- **Secondary/Neutral**: #f5f5f5, #e8e8e8, #666666
-- **Background**: #f5f5f5
-- **Foreground**: #1a1a1a
-- **Accent Colors**: Purple, Cyan, Yellow, Pink, Green for badges
+To push the database schema and generate the Prisma Client, run:
 
-### Typography
-- **Font Family**: Geist Sans (headings & body)
-- **Font Family Mono**: Geist Mono
-- **Font Sizing**: Tailwind default scale
+```bash
+# Push schema to PostgreSQL
+npm run db:push
 
-### Spacing & Radius
-- **Radius**: 0.5rem
-- **Spacing**: Tailwind default scale (gap-4, p-6, etc.)
+# Generate Prisma Client
+npm run prisma:generate
+```
+
+### Seeding Test Data
+
+A database seeder is included to seed 15 realistic projects with varied statuses, timelines, and priorities. To seed, run the development server and access `/api/projects/seed` via your browser or run:
+
+```bash
+curl http://localhost:3000/api/projects/seed
+```
+
+To seed initial Admin credentials (`rhr3032@yahoo.com` / `rhr3032`), run:
+
+```bash
+curl -X POST http://localhost:3000/api/auth/seed
+```
+
+---
 
 ## Getting Started
 
-### Installation
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-1. Install dependencies:
-```bash
-pnpm install
-```
+2. **Run Development Server**:
+   ```bash
+   npm run dev
+   ```
 
-2. Start the development server:
-```bash
-pnpm dev
-```
+3. **Open Browser**:
+   Navigate to http://localhost:3000.
 
-3. Open [http://localhost:3000](http://localhost:3000) in your browser.
+4. **Production Build**:
+   ```bash
+   npm run build
+   ```
 
-### Environment Setup
-
-The app currently uses mock data. To connect a real database:
-
-1. Create a `.env.local` file:
-```env
-DATABASE_URL=your_neon_postgresql_connection_string
-```
-
-2. Update `lib/api.ts` to use actual database queries instead of mock data.
-
-3. Run migrations (when ready with your schema).
+---
 
 ## API Routes
 
-All API routes are available at `/api`:
-
 - `GET /api/projects` - List all projects
 - `POST /api/projects` - Create a new project
-- `GET /api/dashboard` - Get dashboard statistics
+- `GET /api/projects/[id]` - Get single project details
+- `PATCH /api/projects/[id]` - Update project fields
+- `DELETE /api/projects/[id]` - Delete a project
+- `GET /api/dashboard` - Get aggregated dashboard statistics and projects light metadata
+- `GET /api/dashboard/velocity` - Fetch daily trend counts filtered by Month & Year
+- `GET /api/projects/seed` - Clear and seed 15 realistic projects
+- `POST /api/auth/seed` - Seed Admin account credentials
 
-Future routes (when database is connected):
-- `GET /api/projects/[id]` - Get project details
-- `PATCH /api/projects/[id]` - Update project
-- `DELETE /api/projects/[id]` - Delete project
+---
 
-## Mock Data
+## Development Notes
 
-The application ships with 3 sample projects for testing:
-- Lorem ipsum dolor sit amet (Review, Critical, UI/UX Design)
-- Lorem ipsum dolor sit amet (In Progress, Medium, UI/UX Design)
-- Lorem ipsum dolor sit amet (Planning, Medium, UI/UX Design)
-
-These are stored in `lib/api.ts` and will be replaced when a database is connected.
-
-## Customization
-
-### Adding New Statuses/Types/Priorities
-
-Edit `types/index.ts`:
-```typescript
-export type ProjectStatus = 'Planning' | 'In Progress' | 'Review' | 'On Hold' | 'Completed' | 'YourNewStatus';
-```
-
-Then update `components/badges.tsx` with color mappings.
-
-### Styling
-
-All colors and typography are defined in `app/globals.css` as CSS variables. Modify them there to change the entire app's appearance.
-
-## Deployment
-
-This app is ready to deploy on Vercel:
-
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel Settings
-4. Deploy!
-
-The app will automatically build and deploy with `pnpm build`.
-
-## Future Enhancements
-
-- Database integration with Neon PostgreSQL
-- User authentication with Better Auth
-- Real-time updates with WebSockets
-- Project collaboration features
-- File uploads for project assets
-- Email notifications
-- Advanced filtering and search
-- Project templates
-- Activity timeline
-- Team management
-
-## Notes
-
-- The "Dark Mode" button is a placeholder and can be implemented with Next.js theme providers
-- The form currently stores data in memory (mock). It will persist to database once connected
-- Icons use Lucide React - add more icons as needed
-- All dates use ISO format (YYYY-MM-DD) for consistency
-- The mock API service in `lib/api.ts` includes TODO comments for database replacement
-
-## Support
-
-For questions or issues, check:
-- Next.js Documentation: https://nextjs.org/docs
-- Tailwind CSS: https://tailwindcss.com
-- TypeScript: https://www.typescriptlang.org
-
-## License
-
-Created by Raisul R. [Portfolio](https://nuysrafi.vercel.app/)
+- **Glassmorphic Styling** - Card elements use Tailwind custom classes to achieve modern semi-transparent blur backdrops.
+- **Client Address & Industry** - These fields are stored as database columns (`clientAddress` and `industry`) and are fully accessible via forms and detail panels.
+- **WYSIWYG Strategy Content** - Rich-text content generated by TipTap editors is safely stored as HTML strings in the database and rendered via `dangerouslySetInnerHTML` in the details panel.

@@ -225,7 +225,7 @@ export default function BoardPage() {
 
                         <div className="flex items-center justify-between text-xs text-muted-foreground pt-2.5 border-t border-white/[0.06]">
                           <span className="flex items-center gap-1 truncate">
-                            <User size={11} />{project.owner}
+                            <User size={11} />{project.creatorName}
                           </span>
                           {project.deadline && (
                             <span className="flex items-center gap-1 flex-shrink-0">

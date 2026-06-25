@@ -20,18 +20,20 @@ model Project {
   name           String
   description    String   @default("")
   type           String
-  projectType    String   @default("Web Development")
+  projectType    String   @default("")
   status         String
   priority       String
   effort         String
   device         String   @default("")
-  owner          String
+  creatorName    String   @map("owner")
+  industry       String   @default("")
   startDate      String   @default("")
   endDate        String   @default("")
   deadline       String   @default("")
   clientName     String   @default("")
   clientEmail    String   @default("")
   clientPhone    String   @default("")
+  clientAddress  String   @default("")
   previewLink    String   @default("")
   resourceLinks  Json     @default("[]")
   shortOverview  String   @default("")

@@ -126,17 +126,21 @@ export default function ProjectDetailsPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-6 animate-fadeInUp mt-6">
-        {/* Owner & Timeline */}
+        {/* Owner/Creator & Timeline */}
         <div className="grid md:grid-cols-2 gap-6">
-          <Section title="Owner & Company">
+          <Section title="Creator & Company">
             <div className="space-y-4">
               <div>
-                <p className="text-xs text-muted-foreground font-semibold mb-1">OWNER</p>
-                <p className="text-lg font-bold text-foreground">{project.owner || '—'}</p>
+                <p className="text-xs text-muted-foreground font-semibold mb-1">CREATOR NAME</p>
+                <p className="text-lg font-bold text-foreground">{project.creatorName || '—'}</p>
               </div>
               <div className="pt-4 border-t border-white/[0.06]">
                 <p className="text-xs text-muted-foreground font-semibold mb-1">COMPANY</p>
                 <p className="text-base font-semibold text-foreground">{project.company || '—'}</p>
+              </div>
+              <div className="pt-4 border-t border-white/[0.06]">
+                <p className="text-xs text-muted-foreground font-semibold mb-1">INDUSTRY</p>
+                <p className="text-base font-semibold text-foreground">{project.industry || '—'}</p>
               </div>
             </div>
           </Section>
@@ -160,7 +164,7 @@ export default function ProjectDetailsPage() {
         </div>
 
         {/* Client */}
-        {(project.clientName || project.clientEmail || project.clientPhone) && (
+        {(project.clientName || project.clientEmail || project.clientPhone || project.clientAddress) && (
           <Section icon="👤" title="Client Information">
             <div className="grid sm:grid-cols-3 gap-6">
               <div>
@@ -180,6 +184,12 @@ export default function ProjectDetailsPage() {
                   : <p className="text-muted-foreground">—</p>}
               </div>
             </div>
+            {project.clientAddress && (
+              <div className="mt-4 pt-4 border-t border-white/[0.06]">
+                <p className="text-xs text-muted-foreground font-semibold mb-1 flex items-center gap-1">📍 ADDRESS</p>
+                <p className="text-sm font-semibold text-foreground">{project.clientAddress}</p>
+              </div>
+            )}
           </Section>
         )}
 
@@ -222,25 +232,37 @@ export default function ProjectDetailsPage() {
               {project.shortOverview && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-purple-400 mb-2">📄 OVERVIEW</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{project.shortOverview}</p>
+                  <div
+                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: project.shortOverview }}
+                  />
                 </div>
               )}
               {project.businessGoal && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-amber-400 mb-2">🎯 BUSINESS GOAL</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{project.businessGoal}</p>
+                  <div
+                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: project.businessGoal }}
+                  />
                 </div>
               )}
               {project.targetAudience && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-cyan-400 mb-2 flex items-center gap-1"><Users size={12} /> TARGET AUDIENCE</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{project.targetAudience}</p>
+                  <div
+                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: project.targetAudience }}
+                  />
                 </div>
               )}
               {project.competitors && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-rose-400 mb-2">🏆 COMPETITORS</p>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{project.competitors}</p>
+                  <div
+                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: project.competitors }}
+                  />
                 </div>
               )}
             </div>

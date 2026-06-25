@@ -47,7 +47,7 @@ export function RecentProjects() {
               <PriorityBadge priority={project.priority} />
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1"><User size={12} />{project.owner}</span>
+              <span className="flex items-center gap-1"><User size={12} />{project.creatorName}</span>
               {project.company && <span className="flex items-center gap-1"><Building2 size={12} />{project.company}</span>}
             </div>
           </div>
