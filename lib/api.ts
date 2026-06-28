@@ -46,6 +46,8 @@ function toProject(project: PrismaProject): Project {
     ...project,
     resourceLinks: toResourceLinks(project.resourceLinks),
     tags: toStringArray(project.tags),
+    techStack: toStringArray(project.techStack),
+    toolsUsed: toStringArray(project.toolsUsed),
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
   } as Project;
@@ -56,16 +58,20 @@ function toProjectCreateData(project: ProjectInput): Prisma.ProjectCreateInput {
     ...project,
     resourceLinks: project.resourceLinks,
     tags: project.tags,
+    techStack: project.techStack,
+    toolsUsed: project.toolsUsed,
   };
 }
 
 function toProjectUpdateData(updates: ProjectUpdateInput): Prisma.ProjectUpdateInput {
-  const { resourceLinks, tags, ...rest } = updates;
+  const { resourceLinks, tags, techStack, toolsUsed, ...rest } = updates;
 
   return {
     ...rest,
     ...(resourceLinks ? { resourceLinks } : {}),
     ...(tags ? { tags } : {}),
+    ...(techStack ? { techStack } : {}),
+    ...(toolsUsed ? { toolsUsed } : {}),
   };
 }
 
@@ -126,14 +132,14 @@ export async function deleteProject(id: string): Promise<boolean> {
   }
 }
 
-export async function getDashboardStats(): Promise<DashboardStats> {
+export async function getDashboardStats(where?: Prisma.ProjectWhereInput): Promise<DashboardStats> {
   const prisma = getPrisma();
   const [totalProjects, inProgress, completed, criticalPriority, importantPriority] = await Promise.all([
-    prisma.project.count(),
-    prisma.project.count({ where: { status: 'In Progress' } }),
-    prisma.project.count({ where: { status: 'Completed' } }),
-    prisma.project.count({ where: { priority: 'Critical' } }),
-    prisma.project.count({ where: { priority: 'Important' } }),
+    prisma.project.count({ where }),
+    prisma.project.count({ where: { ...where, status: 'In Progress' } }),
+    prisma.project.count({ where: { ...where, status: 'Completed' } }),
+    prisma.project.count({ where: { ...where, priority: 'Critical' } }),
+    prisma.project.count({ where: { ...where, priority: 'Important' } }),
   ]);
 
   return {
@@ -145,9 +151,10 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   };
 }
 
-export async function getProjectsByStatus(): Promise<ProjectsByStatus[]> {
+export async function getProjectsByStatus(where?: Prisma.ProjectWhereInput): Promise<ProjectsByStatus[]> {
   const grouped = await getPrisma().project.groupBy({
     by: ['status'],
+    where,
     _count: { status: true },
   });
 
@@ -157,9 +164,10 @@ export async function getProjectsByStatus(): Promise<ProjectsByStatus[]> {
   }));
 }
 
-export async function getProjectsByType(): Promise<ProjectsByType[]> {
+export async function getProjectsByType(where?: Prisma.ProjectWhereInput): Promise<ProjectsByType[]> {
   const grouped = await getPrisma().project.groupBy({
     by: ['projectType'],
+    where,
     _count: { projectType: true },
   });
 
@@ -173,9 +181,10 @@ export async function updateProjectStatus(id: string, status: string): Promise<P
   return updateProject(id, { status });
 }
 
-export async function getProjectsByPriority() {
+export async function getProjectsByPriority(where?: Prisma.ProjectWhereInput) {
   const grouped = await getPrisma().project.groupBy({
     by: ['priority'],
+    where,
     _count: { priority: true },
   });
 
@@ -186,9 +195,10 @@ export async function getProjectsByPriority() {
   }));
 }
 
-export async function getProjectsMonthlyTrend() {
+export async function getProjectsMonthlyTrend(where?: Prisma.ProjectWhereInput) {
   const prisma = getPrisma();
   const projects = await prisma.project.findMany({
+    where,
     select: { createdAt: true },
   });
 

@@ -27,6 +27,8 @@ const projectSchema = z.object({
   targetAudience: z.string().default(''),
   competitors: z.string().default(''),
   tags: z.array(z.string()).default([]),
+  techStack: z.array(z.string()).default([]),
+  toolsUsed: z.array(z.string()).default([]),
   company: z.string().default(''),
 });
 

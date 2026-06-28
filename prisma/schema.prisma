@@ -41,7 +41,20 @@ model Project {
   targetAudience String   @default("")
   competitors    String   @default("")
   tags           Json     @default("[]")
+  techStack      Json     @default("[]")
+  toolsUsed      Json     @default("[]")
   company        String   @default("")
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
+
+model TechOption {
+  id   String @id @default(cuid())
+  name String @unique
+}
+
+model ToolOption {
+  id   String @id @default(cuid())
+  name String @unique
+}
+

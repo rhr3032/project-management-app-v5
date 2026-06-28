@@ -10,6 +10,10 @@
   backdrop-filter: blur(16px);
   min-height: 320px;
   transition: border-color 0.2s;
+  overflow: hidden;
+  /* Prevent editor from ever expanding the page horizontally */
+  max-width: 100%;
+  min-width: 0;
 }
 
 .editor-wrapper:focus-within {
@@ -50,8 +54,11 @@
 .editor-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 20px;
   min-height: 250px;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Editor Content Area */
@@ -62,6 +69,12 @@
   outline: none;
   min-height: 200px;
   caret-color: #6366f1;
+  /* Prevent content from overflowing the editor box */
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 /* Placeholder */

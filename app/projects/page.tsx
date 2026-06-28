@@ -92,6 +92,10 @@ export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [techStackFilter, setTechStackFilter] = useState('All Tech Stack');
+  const [toolsUsedFilter, setToolsUsedFilter] = useState('All Tools Used');
+  const [allTechOptions, setAllTechOptions] = useState<string[]>([]);
+  const [allToolOptions, setAllToolOptions] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All Statuses');
   const [projectTypeFilter, setProjectTypeFilter] = useState('All Project Types');
@@ -106,6 +110,19 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     fetchProjects();
+    async function fetchOptions() {
+      try {
+        const [techRes, toolRes] = await Promise.all([
+          fetch('/api/options?type=tech'),
+          fetch('/api/options?type=tool')
+        ]);
+        if (techRes.ok) setAllTechOptions(await techRes.json());
+        if (toolRes.ok) setAllToolOptions(await toolRes.json());
+      } catch (err) {
+        console.error('Failed to load lookup options:', err);
+      }
+    }
+    fetchOptions();
   }, []);
 
   async function fetchProjects() {
@@ -152,6 +169,8 @@ export default function ProjectsPage() {
     if (categoryFilter !== 'All Categories') filtered = filtered.filter(p => p.type === categoryFilter);
     if (priorityFilter !== 'All Priorities') filtered = filtered.filter(p => p.priority === priorityFilter);
     if (deviceFilter !== 'All Devices') filtered = filtered.filter(p => p.device === deviceFilter);
+    if (techStackFilter !== 'All Tech Stack') filtered = filtered.filter(p => p.techStack && p.techStack.includes(techStackFilter));
+    if (toolsUsedFilter !== 'All Tools Used') filtered = filtered.filter(p => p.toolsUsed && p.toolsUsed.includes(toolsUsedFilter));
 
     if (sortBy === 'Newest First') filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     else if (sortBy === 'Oldest First') filtered.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -159,7 +178,7 @@ export default function ProjectsPage() {
     else if (sortBy === 'Name Z-A') filtered.sort((a, b) => b.name.localeCompare(a.name));
 
     setFilteredProjects(filtered);
-  }, [projects, searchTerm, statusFilter, projectTypeFilter, categoryFilter, priorityFilter, deviceFilter, sortBy]);
+  }, [projects, searchTerm, statusFilter, projectTypeFilter, categoryFilter, priorityFilter, deviceFilter, sortBy, techStackFilter, toolsUsedFilter]);
 
   const openDeleteDialog = (e: React.MouseEvent, project: Project) => {
     e.preventDefault(); e.stopPropagation();
@@ -236,6 +255,16 @@ export default function ProjectsPage() {
             {ALL_DEVICES.map(s => <option key={s} value={s}>{s}</option>)}
           </select>
 
+          <select value={techStackFilter} onChange={e => setTechStackFilter(e.target.value)} className={selectClass}>
+            <option value="All Tech Stack">All Tech Stack</option>
+            {allTechOptions.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <select value={toolsUsedFilter} onChange={e => setToolsUsedFilter(e.target.value)} className={selectClass}>
+            <option value="All Tools Used">All Tools Used</option>
+            {allToolOptions.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
           <select value={sortBy} onChange={e => setSortBy(e.target.value)} className={selectClass}>
             <option>Newest First</option>
             <option>Oldest First</option>
@@ -291,6 +320,31 @@ export default function ProjectsPage() {
                     <PriorityBadge priority={project.priority} />
                     {project.device && <DeviceBadge device={project.device} />}
                   </div>
+
+                  {/* Tech & Tools Badges */}
+                  {((project.techStack && project.techStack.length > 0) || (project.toolsUsed && project.toolsUsed.length > 0)) && (
+                    <div className="flex items-center gap-1.5 flex-wrap mb-3 bg-white/[0.01] border border-white/[0.03] p-2 rounded-lg">
+                      {project.techStack?.slice(0, 3).map((tech, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-md text-[10px] font-medium">
+                          {tech}
+                        </span>
+                      ))}
+                      {project.techStack && project.techStack.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground mr-2">+{project.techStack.length - 3}</span>
+                      )}
+                      {project.techStack && project.techStack.length > 0 && project.toolsUsed && project.toolsUsed.length > 0 && (
+                        <span className="w-1 h-3 border-l border-white/10 mx-1"></span>
+                      )}
+                      {project.toolsUsed?.slice(0, 3).map((tool, idx) => (
+                        <span key={idx} className="px-2 py-0.5 bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 rounded-md text-[10px] font-medium">
+                          {tool}
+                        </span>
+                      ))}
+                      {project.toolsUsed && project.toolsUsed.length > 3 && (
+                        <span className="text-[10px] text-muted-foreground">+{project.toolsUsed.length - 3}</span>
+                      )}
+                    </div>
+                  )}
 
                   {/* Meta info */}
                   <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">

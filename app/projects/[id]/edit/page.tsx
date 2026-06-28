@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ChevronLeft, Plus, X } from 'lucide-react';
 import { Project } from '@/types';
 import { RichTextEditor } from '@/components/rich-text-editor';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 const PROJECT_STATUSES = [
   'Research','Planning','In Progress','Review','On Hold','Completed','Cancelled',
@@ -139,6 +140,8 @@ export default function EditProjectPage() {
   const projectId = params.id as string;
   const [formData, setFormData] = useState<Partial<Project> & { tags?: string }>({});
   const [description, setDescription] = useState('');
+  const [techStack, setTechStack] = useState<string[]>([]);
+  const [toolsUsed, setToolsUsed] = useState<string[]>([]);
   const [resourceLinks, setResourceLinks] = useState<Array<{ url: string; title: string }>>([]);
   const [newLink, setNewLink] = useState({ url: '', title: '' });
   const [loading, setLoading] = useState(true);
@@ -167,6 +170,8 @@ export default function EditProjectPage() {
           tags: Array.isArray(project.tags) ? project.tags.join(', ') : '',
         });
         setDescription(project.description || '');
+        setTechStack(project.techStack || []);
+        setToolsUsed(project.toolsUsed || []);
         setResourceLinks(project.resourceLinks || []);
       } catch { router.push('/projects'); }
       finally { setLoading(false); }
@@ -202,7 +207,7 @@ export default function EditProjectPage() {
       const res = await fetch(`/api/projects/${projectId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, description, resourceLinks, tags: tagsArray }),
+        body: JSON.stringify({ ...formData, description, resourceLinks, tags: tagsArray, techStack, toolsUsed }),
       });
       if (res.ok) router.push(`/projects/${projectId}`);
       else { const d = await res.json(); setError(d.error || 'Failed to update project'); }
@@ -288,11 +293,23 @@ export default function EditProjectPage() {
                   </select>
                 </div>
               </div>
-              
-              <div>
-                <label className={labelClass}>Project Description</label>
-                <RichTextEditor content={description} onChange={setDescription}
-                  placeholder="Write a detailed project description..." />
+
+              {/* Tech Stack & Tools Used */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+                <MultiSelect
+                  label="Tech Stack"
+                  selected={techStack}
+                  onChange={setTechStack}
+                  type="tech"
+                  placeholder="Search and select technologies..."
+                />
+                <MultiSelect
+                  label="Tools Used"
+                  selected={toolsUsed}
+                  onChange={setToolsUsed}
+                  type="tool"
+                  placeholder="Search and select tools..."
+                />
               </div>
             </div>
           </SectionCard>
@@ -373,6 +390,15 @@ export default function EditProjectPage() {
                 ))}
               </div>
             </div>
+          </SectionCard>
+
+          {/* Project Description */}
+          <SectionCard emoji="📝" title="PROJECT DESCRIPTION" colorClass="text-violet-400">
+            <RichTextEditor
+              content={description}
+              onChange={setDescription}
+              placeholder="Write a detailed project description with rich formatting..."
+            />
           </SectionCard>
 
           {/* Project Strategy */}

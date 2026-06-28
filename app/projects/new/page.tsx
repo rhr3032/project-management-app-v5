@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronLeft, Plus, X } from 'lucide-react';
 import { RichTextEditor } from '@/components/rich-text-editor';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 const PROJECT_STATUSES = [
   'Research','Planning','In Progress','Review','On Hold','Completed','Cancelled',
@@ -164,6 +165,8 @@ export default function NewProjectPage() {
     industry: '',
   });
   const [description, setDescription] = useState('');
+  const [techStack, setTechStack] = useState<string[]>([]);
+  const [toolsUsed, setToolsUsed] = useState<string[]>([]);
   const [resourceLinks, setResourceLinks] = useState<Array<{ url: string; title: string }>>([]);
   const [newLink, setNewLink] = useState({ url: '', title: '' });
   const [loading, setLoading] = useState(false);
@@ -210,6 +213,8 @@ export default function NewProjectPage() {
           description,
           resourceLinks,
           tags: formData.tags.split(',').map(t => t.trim()).filter(Boolean),
+          techStack,
+          toolsUsed,
         }),
       });
       if (response.ok) {
@@ -307,13 +312,21 @@ export default function NewProjectPage() {
                 </div>
               </div>
 
-              {/* Description - Rich Text Editor */}
-              <div>
-                <label className={labelClass}>Project Description</label>
-                <RichTextEditor
-                  content={description}
-                  onChange={setDescription}
-                  placeholder="Write a detailed project description with rich formatting..."
+              {/* Tech Stack & Tools Used */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
+                <MultiSelect
+                  label="Tech Stack"
+                  selected={techStack}
+                  onChange={setTechStack}
+                  type="tech"
+                  placeholder="Search and select technologies..."
+                />
+                <MultiSelect
+                  label="Tools Used"
+                  selected={toolsUsed}
+                  onChange={setToolsUsed}
+                  type="tool"
+                  placeholder="Search and select tools..."
                 />
               </div>
             </div>
@@ -404,6 +417,15 @@ export default function NewProjectPage() {
                 )}
               </div>
             </div>
+          </SectionCard>
+
+          {/* Project Description */}
+          <SectionCard emoji="📝" title="PROJECT DESCRIPTION" colorClass="text-violet-400">
+            <RichTextEditor
+              content={description}
+              onChange={setDescription}
+              placeholder="Write a detailed project description with rich formatting..."
+            />
           </SectionCard>
 
           {/* Project Strategy */}

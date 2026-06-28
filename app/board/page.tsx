@@ -38,6 +38,10 @@ export default function BoardPage() {
   const [loading, setLoading] = useState(true);
   const [draggedProject, setDraggedProject] = useState<Project | null>(null);
   const [dragOverStatus, setDragOverStatus] = useState<ProjectStatus | null>(null);
+  const [techFilter, setTechFilter] = useState('All Tech Stack');
+  const [toolFilter, setToolFilter] = useState('All Tools Used');
+  const [allTechOptions, setAllTechOptions] = useState<string[]>([]);
+  const [allToolOptions, setAllToolOptions] = useState<string[]>([]);
   const [projectsByStatus, setProjectsByStatus] = useState<Record<ProjectStatus, Project[]>>(
     () => Object.fromEntries(ALL_STATUSES.map(s => [s, []])) as Record<ProjectStatus, Project[]>
   );
@@ -49,12 +53,6 @@ export default function BoardPage() {
         const res = await fetch('/api/projects');
         const data: Project[] = await res.json();
         setProjects(data);
-
-        const grouped = Object.fromEntries(ALL_STATUSES.map(s => [s, []])) as Record<ProjectStatus, Project[]>;
-        data.forEach(p => {
-          if (grouped[p.status] !== undefined) grouped[p.status].push(p);
-        });
-        setProjectsByStatus(grouped);
       } catch (err) {
         console.error('Failed to fetch projects:', err);
       } finally {
@@ -62,7 +60,38 @@ export default function BoardPage() {
       }
     }
     fetchProjects();
+
+    async function fetchOptions() {
+      try {
+        const [techRes, toolRes] = await Promise.all([
+          fetch('/api/options?type=tech'),
+          fetch('/api/options?type=tool')
+        ]);
+        if (techRes.ok) setAllTechOptions(await techRes.json());
+        if (toolRes.ok) setAllToolOptions(await toolRes.json());
+      } catch (err) {
+        console.error('Failed to load lookup options:', err);
+      }
+    }
+    fetchOptions();
   }, []);
+
+  useEffect(() => {
+    const grouped = Object.fromEntries(ALL_STATUSES.map(s => [s, []])) as Record<ProjectStatus, Project[]>;
+    
+    let filtered = [...projects];
+    if (techFilter !== 'All Tech Stack') {
+      filtered = filtered.filter(p => p.techStack && p.techStack.includes(techFilter));
+    }
+    if (toolFilter !== 'All Tools Used') {
+      filtered = filtered.filter(p => p.toolsUsed && p.toolsUsed.includes(toolFilter));
+    }
+
+    filtered.forEach(p => {
+      if (grouped[p.status] !== undefined) grouped[p.status].push(p);
+    });
+    setProjectsByStatus(grouped);
+  }, [projects, techFilter, toolFilter]);
 
   const handleDragStart = (project: Project) => setDraggedProject(project);
 
@@ -138,11 +167,22 @@ export default function BoardPage() {
               <p className="text-xs text-muted-foreground">{totalProjects} projects · {ALL_STATUSES.length} columns</p>
             </div>
           </div>
-          <Link href="/projects/new">
-            <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-sm">
-              <Plus size={15} /> New Project
-            </button>
-          </Link>
+          
+          <div className="flex items-center gap-2 flex-wrap w-full sm:w-auto">
+            <select value={techFilter} onChange={e => setTechFilter(e.target.value)} className="px-3 py-1.5 border border-white/10 rounded-xl glass-input text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all bg-slate-950">
+              <option value="All Tech Stack">All Tech Stack</option>
+              {allTechOptions.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <select value={toolFilter} onChange={e => setToolFilter(e.target.value)} className="px-3 py-1.5 border border-white/10 rounded-xl glass-input text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all bg-slate-950">
+              <option value="All Tools Used">All Tools Used</option>
+              {allToolOptions.map(t => <option key={t} value={t}>{t}</option>)}
+            </select>
+            <Link href="/projects/new">
+              <button className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-sm">
+                <Plus size={15} /> New Project
+              </button>
+            </Link>
+          </div>
         </div>
       </div>
 

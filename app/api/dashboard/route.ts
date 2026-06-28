@@ -4,14 +4,30 @@ import { getPrisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
   try {
+    const techStack = request.nextUrl.searchParams.get('techStack');
+    const toolsUsed = request.nextUrl.searchParams.get('toolsUsed');
+
+    const where: any = {};
+    if (techStack && techStack !== 'All Tech Stack') {
+      where.techStack = {
+        array_contains: techStack,
+      };
+    }
+    if (toolsUsed && toolsUsed !== 'All Tools Used') {
+      where.toolsUsed = {
+        array_contains: toolsUsed,
+      };
+    }
+
     const prisma = getPrisma();
     const [stats, byStatus, byType, byPriority, monthlyTrend, projects] = await Promise.all([
-      getDashboardStats(),
-      getProjectsByStatus(),
-      getProjectsByType(),
-      getProjectsByPriority(),
-      getProjectsMonthlyTrend(),
+      getDashboardStats(where),
+      getProjectsByStatus(where),
+      getProjectsByType(where),
+      getProjectsByPriority(where),
+      getProjectsMonthlyTrend(where),
       prisma.project.findMany({
+        where,
         select: {
           id: true,
           createdAt: true,

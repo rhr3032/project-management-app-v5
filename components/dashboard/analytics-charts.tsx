@@ -18,6 +18,8 @@ interface AnalyticsChartsProps {
   monthlyTrend?: Array<{ month: string; projects: number }>;
   byPriority: Array<{ priority: string; count: number }>;
   projects: any[];
+  techStackFilter?: string;
+  toolsUsedFilter?: string;
 }
 
 const priorityColorMap: Record<string, string> = {
@@ -52,7 +54,7 @@ const MONTHS = [
   { value: 12, label: 'December' },
 ];
 
-export function AnalyticsCharts({ byPriority, projects }: AnalyticsChartsProps) {
+export function AnalyticsCharts({ byPriority, projects, techStackFilter, toolsUsedFilter }: AnalyticsChartsProps) {
   const [mounted, setMounted] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
@@ -72,7 +74,7 @@ export function AnalyticsCharts({ byPriority, projects }: AnalyticsChartsProps) 
     async function fetchVelocityData() {
       setChartLoading(true);
       try {
-        const res = await fetch(`/api/dashboard/velocity?month=${selectedMonth}&year=${selectedYear}`);
+        const res = await fetch(`/api/dashboard/velocity?month=${selectedMonth}&year=${selectedYear}&techStack=${techStackFilter || ''}&toolsUsed=${toolsUsedFilter || ''}`);
         if (!res.ok) throw new Error('Failed to fetch velocity data');
         const data = await res.json();
         setVelocityTrend(data.trend || []);
@@ -88,7 +90,7 @@ export function AnalyticsCharts({ byPriority, projects }: AnalyticsChartsProps) 
     if (mounted) {
       fetchVelocityData();
     }
-  }, [selectedMonth, selectedYear, mounted]);
+  }, [selectedMonth, selectedYear, mounted, techStackFilter, toolsUsedFilter]);
 
   if (!mounted) {
     return (

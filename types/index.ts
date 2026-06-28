@@ -30,6 +30,8 @@ export interface Project {
   targetAudience: string;
   competitors: string;
   tags: string[];
+  techStack: string[];
+  toolsUsed: string[];
   company: string;
   createdAt: string;
   updatedAt: string;

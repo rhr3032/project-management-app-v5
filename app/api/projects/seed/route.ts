@@ -1,12 +1,78 @@
 import { NextResponse } from 'next/server';
 import { getPrisma } from '@/lib/prisma';
 
+const DEFAULT_TECH_STACK = [
+  // Programming Languages
+  'JavaScript', 'TypeScript', 'Python', 'Java', 'C', 'C++', 'C#', 'PHP', 'Go', 'Rust', 'Swift', 'Kotlin', 'Dart', 'Ruby', 'Scala', 'R', 'Julia', 'MATLAB', 'SQL', 'Bash', 'PowerShell', 'Lua', 'Perl', 'Elixir', 'Haskell', 'Objective-C', 'Assembly', 'Visual Basic', 'Groovy', 'F#',
+  // Frontend
+  'HTML5', 'CSS3', 'Sass', 'Less', 'Tailwind CSS', 'Bootstrap', 'Material UI', 'Chakra UI', 'Ant Design', 'shadcn/ui', 'Radix UI', 'React', 'Next.js', 'Vue.js', 'Nuxt.js', 'Angular', 'Svelte', 'SvelteKit', 'Astro', 'Remix', 'Gatsby', 'SolidJS', 'Alpine.js', 'jQuery',
+  // Backend
+  'Node.js', 'Express.js', 'NestJS', 'Fastify', 'Django', 'Flask', 'FastAPI', 'Laravel', 'Symfony', 'CodeIgniter', 'Spring Boot', 'ASP.NET Core', 'Ruby on Rails', 'Phoenix', 'Gin', 'Fiber',
+  // Mobile Development
+  'Flutter', 'React Native', 'SwiftUI', 'UIKit', 'Jetpack Compose', 'Ionic', 'Capacitor', 'Native Android', 'Native iOS', 'Xamarin', '.NET MAUI',
+  // Databases
+  'PostgreSQL', 'MySQL', 'MariaDB', 'SQLite', 'Microsoft SQL Server', 'Oracle Database', 'MongoDB', 'Firebase Firestore', 'Redis', 'Cassandra', 'CouchDB', 'DynamoDB', 'Neo4j', 'Elasticsearch', 'ArangoDB', 'RavenDB', 'Supabase', 'Firebase', 'Appwrite', 'PocketBase', 'NeonDB',
+  // Cloud & Infrastructure
+  'AWS', 'Google Cloud Platform', 'Microsoft Azure', 'DigitalOcean', 'Cloudflare', 'Vercel', 'Netlify', 'Railway', 'Fly.io', 'Render', 'Heroku',
+  // DevOps & Containers
+  'Docker', 'Docker Compose', 'Kubernetes', 'Helm', 'Terraform', 'Ansible', 'Nginx', 'Apache', 'Traefik',
+  // APIs & Integrations
+  'REST API', 'GraphQL', 'gRPC', 'WebSocket', 'OpenAPI', 'Stripe API', 'Firebase Authentication', 'OAuth', 'JWT',
+  // ORMs
+  'Prisma', 'Drizzle ORM', 'Sequelize', 'TypeORM', 'MikroORM', 'Mongoose'
+];
+
+const DEFAULT_TOOLS_USED = [
+  // UI/UX Design
+  'Figma', 'FigJam', 'Adobe XD', 'Sketch', 'Framer', 'InVision', 'Miro', 'Adobe Photoshop', 'Adobe Illustrator', 'Adobe After Effects', 'Adobe Premiere Pro', 'Adobe Lightroom', 'Canva', 'Blender',
+  // AI Tools
+  'ChatGPT', 'GitHub Copilot', 'Claude', 'Google Gemini', 'Microsoft Copilot', 'Cursor AI', 'Windsurf AI', 'Perplexity AI', 'v0', 'Bolt.new', 'Lovable', 'Replit AI', 'Codeium', 'Tabnine', 'Amazon CodeWhisperer', 'Continue.dev', 'Ollama', 'LM Studio', 'Stable Diffusion', 'Midjourney', 'DALL·E', 'Leonardo AI', 'Runway ML',
+  // IDEs & Code Editors
+  'Visual Studio Code', 'Visual Studio', 'Cursor', 'Windsurf', 'IntelliJ IDEA', 'WebStorm', 'PyCharm', 'PhpStorm', 'Rider', 'CLion', 'GoLand', 'Android Studio', 'Xcode', 'Eclipse', 'NetBeans', 'Sublime Text', 'Vim', 'Neovim', 'Notepad++', 'Zed',
+  // Version Control
+  'Git', 'GitHub', 'GitLab', 'Bitbucket', 'Azure DevOps',
+  // DevOps & Deployment
+  'Docker Desktop', 'Kubernetes', 'Jenkins', 'GitHub Actions', 'GitLab CI/CD', 'CircleCI', 'Azure Pipelines', 'AWS CodePipeline', 'Vercel', 'Netlify', 'Railway', 'Render', 'DigitalOcean', 'Cloudflare Pages',
+  // API Development
+  'Postman', 'Insomnia', 'Swagger', 'Bruno', 'Hoppscotch',
+  // Testing & QA
+  'Cypress', 'Playwright', 'Selenium', 'Jest', 'Vitest', 'Mocha', 'Jasmine', 'PHPUnit', 'JUnit', 'TestRail', 'BrowserStack', 'LambdaTest', 'Katalon Studio',
+  // Database Tools
+  'pgAdmin', 'DBeaver', 'MongoDB Compass', 'MySQL Workbench', 'TablePlus', 'DataGrip', 'phpMyAdmin', 'RedisInsight', 'Studio 3T',
+  // Collaboration & Project Management
+  'Notion', 'Jira', 'Trello', 'ClickUp', 'Asana', 'Monday.com', 'Linear', 'Slack', 'Microsoft Teams', 'Discord', 'Confluence',
+  // Monitoring & Analytics
+  'Grafana', 'Prometheus', 'Sentry', 'LogRocket', 'Google Analytics', 'Hotjar', 'Mixpanel', 'Datadog', 'New Relic'
+];
+
 export async function GET() {
   try {
     const prisma = getPrisma();
     
     // Clear existing projects to make the analytics clean and consistent
     await prisma.project.deleteMany();
+    
+    // Clear dynamic lookup options
+    await prisma.techOption.deleteMany();
+    await prisma.toolOption.deleteMany();
+
+    // Populate lookup options
+    await Promise.all([
+      ...DEFAULT_TECH_STACK.map(name =>
+        prisma.techOption.upsert({
+          where: { name },
+          update: {},
+          create: { name }
+        })
+      ),
+      ...DEFAULT_TOOLS_USED.map(name =>
+        prisma.toolOption.upsert({
+          where: { name },
+          update: {},
+          create: { name }
+        })
+      )
+    ]);
     
     const getPastDate = (monthsAgo: number, dayOffset: number = 0) => {
       const d = new Date();
@@ -42,6 +108,8 @@ export async function GET() {
         targetAudience: '<p>College Administrators, Teachers, and Staff.</p>',
         competitors: '<p>PowerSchool, Blackbaud, Fedena</p>',
         tags: ['ERP', 'School Management', 'Web Portal', 'Education'],
+        techStack: ['Figma', 'TypeScript', 'React', 'Next.js', 'Node.js', 'PostgreSQL', 'Tailwind CSS'],
+        toolsUsed: ['Figma', 'Visual Studio Code', 'GitHub', 'Postman', 'Vercel', 'Notion', 'Sentry'],
         industry: 'Education',
         createdAt: getPastDate(5, 5),
       },
@@ -64,6 +132,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Dedicated Android application supporting real-time academic calendar notifications and homework submissions.</p>',
         tags: ['Android', 'EdTech', 'App', 'Students'],
+        techStack: ['Flutter', 'Dart', 'Firebase', 'SQLite'],
+        toolsUsed: ['Android Studio', 'Figma', 'GitHub', 'GitLab CI/CD', 'ChatGPT', 'Postman'],
         industry: 'Education',
         createdAt: getPastDate(4, 12),
       },
@@ -87,6 +157,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Responsive teacher dashboard layout with CSV grading exports and automated student progress flags.</p>',
         tags: ['Dashboard', 'React', 'Full-Stack', 'Teachers'],
+        techStack: ['React', 'Next.js', 'Tailwind CSS', 'TypeScript', 'Node.js', 'Express.js', 'MongoDB'],
+        toolsUsed: ['Visual Studio Code', 'GitHub', 'Postman', 'Jira', 'Slack'],
         industry: 'Education',
         createdAt: getPastDate(3, 8),
       },
@@ -109,6 +181,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Dedicated push-notification engine for instant school notices and individual parent chat rooms.</p>',
         tags: ['iOS', 'Push Notifications', 'Real-time Chat', 'Parents'],
+        techStack: ['React Native', 'TypeScript', 'Node.js', 'WebSocket', 'Firebase Firestore', 'Firebase Authentication'],
+        toolsUsed: ['Xcode', 'Visual Studio Code', 'Git', 'Notion', 'Discord'],
         industry: 'Education',
         createdAt: getPastDate(2, 4),
       },
@@ -132,6 +206,8 @@ export async function GET() {
         previewLink: 'https://bhec.edu.bd',
         shortOverview: '<p>Public admission website featuring virtual campus tours and SEO-optimized search for degree programs.</p>',
         tags: ['Website', 'SEO', 'Tailwind', 'Nextjs'],
+        techStack: ['React', 'Next.js', 'Tailwind CSS', 'TypeScript', 'Astro', 'Prisma', 'PostgreSQL'],
+        toolsUsed: ['Figma', 'Visual Studio Code', 'GitHub', 'Vercel', 'Google Analytics'],
         industry: 'Education',
         createdAt: getPastDate(5, 20),
       },
@@ -154,6 +230,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Automated billing microservice that emails PDF receipts to parents immediately upon bKash checkout.</p>',
         tags: ['Fintech', 'bKash', 'Nagad', 'API Integration'],
+        techStack: ['Node.js', 'Express.js', 'TypeScript', 'REST API', 'PostgreSQL', 'Stripe API', 'JWT'],
+        toolsUsed: ['Visual Studio Code', 'Postman', 'GitHub', 'Sentry', 'Docker Desktop'],
         industry: 'Finance',
         createdAt: getPastDate(1, 2),
       },
@@ -176,6 +254,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Interactive charts and forecasting algorithms displaying school financial health metrics to the board of directors.</p>',
         tags: ['Analytics', 'Business Intelligence', 'Docker', 'Postgres'],
+        techStack: ['Python', 'Django', 'PostgreSQL', 'Docker', 'Nginx', 'HTML5', 'CSS3'],
+        toolsUsed: ['PyCharm', 'GitHub', 'Docker Desktop', 'pgAdmin', 'Grafana', 'Prometheus'],
         industry: 'Education',
         createdAt: getPastDate(5, 28),
       },
@@ -199,6 +279,8 @@ export async function GET() {
         previewLink: 'https://figma.com/design/eims-mobile-ds',
         shortOverview: '<p>Standardized UI kit offering consistent buttons, input controls, and dark-mode styles.</p>',
         tags: ['Design System', 'Figma', 'UI Kit', 'Style Guide'],
+        techStack: ['Tailwind CSS', 'Figma'],
+        toolsUsed: ['Figma', 'FigJam', 'Miro'],
         industry: 'Software Development',
         createdAt: getPastDate(4, 1),
       },
@@ -221,6 +303,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Integrating live WebRTC video channels inside student course pages with whiteboard overlays.</p>',
         tags: ['WebRTC', 'Live Video', 'API', 'Interactive'],
+        techStack: ['Node.js', 'Socket.io', 'WebSocket', 'JavaScript', 'HTML5', 'CSS3'],
+        toolsUsed: ['Visual Studio Code', 'GitHub', 'Chrome DevTools', 'Postman'],
         industry: 'Education',
         createdAt: getPastDate(2, 15),
       },
@@ -243,6 +327,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Scan barcodes using device camera to instantly lookup books and log due dates.</p>',
         tags: ['Barcode Scanner', 'Library', 'Flutter', 'SQLite'],
+        techStack: ['Flutter', 'Dart', 'SQLite', 'REST API'],
+        toolsUsed: ['Android Studio', 'GitHub', 'Figma', 'Slack'],
         industry: 'Education',
         createdAt: getPastDate(3, 22),
       },
@@ -265,6 +351,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Standardizing official brand identity, business cards, and customized vectors for EIMS marketing.</p>',
         tags: ['Logo', 'Branding', 'Vector Art', 'Illustrator'],
+        techStack: ['Figma'],
+        toolsUsed: ['Adobe Illustrator', 'Adobe Photoshop', 'Figma', 'Canva'],
         industry: 'Marketing & Advertising',
         createdAt: getPastDate(5, 29),
       },
@@ -287,6 +375,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Apollo Federation setup to resolve database queries across student, teacher, and financial servers.</p>',
         tags: ['GraphQL', 'Apollo', 'Microservices', 'Infra'],
+        techStack: ['TypeScript', 'Node.js', 'NestJS', 'GraphQL', 'PostgreSQL', 'Docker', 'Apollo'],
+        toolsUsed: ['WebStorm', 'GitHub Actions', 'Postman', 'Datadog', 'Sentry'],
         industry: 'Information Technology',
         createdAt: getPastDate(1, 10),
       },
@@ -310,6 +400,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>Gamified mathematics application with online leaderboards and customized achievement badges.</p>',
         tags: ['Gamification', 'Math', 'Unity', 'Kids Education'],
+        techStack: ['Unity', 'C#', 'Firebase Firestore', 'Firebase Authentication'],
+        toolsUsed: ['Blender', 'Visual Studio', 'GitHub', 'Claude', 'Figma'],
         industry: 'Education',
         createdAt: getPastDate(2, 28),
       },
@@ -332,6 +424,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>One-click local docker orchestration setup to stand up PostgreSQL, Redis, and API endpoints.</p>',
         tags: ['Docker', 'DevOps', 'Postgres', 'Local Dev'],
+        techStack: ['Docker', 'Docker Compose', 'Bash', 'PostgreSQL', 'Redis'],
+        toolsUsed: ['Docker Desktop', 'Visual Studio Code', 'GitHub', 'DBeaver', 'Slack'],
         industry: 'Software Development',
         createdAt: getPastDate(3, 10),
       },
@@ -354,6 +448,8 @@ export async function GET() {
         clientAddress: 'College Road, Barisal, Bangladesh',
         shortOverview: '<p>User research documentation highlighting bottlenecks in student registrations and parent profile creations.</p>',
         tags: ['User Research', 'Audit', 'Journey Mapping', 'Usability'],
+        techStack: ['Figma'],
+        toolsUsed: ['Figma', 'FigJam', 'Miro', 'Notion', 'Confluence'],
         industry: 'Education',
         createdAt: getPastDate(5, 15),
       }
@@ -386,6 +482,8 @@ export async function GET() {
           targetAudience: project.targetAudience || '',
           competitors: project.competitors || '',
           tags: project.tags,
+          techStack: project.techStack || [],
+          toolsUsed: project.toolsUsed || [],
           industry: project.industry,
           createdAt: project.createdAt,
         }
@@ -394,10 +492,10 @@ export async function GET() {
 
     return NextResponse.json({
       ok: true,
-      message: `${projectsData.length} realistic projects successfully seeded into the database.`
+      message: `${projectsData.length} realistic projects and their tech stacks & tools successfully seeded into the database.`
     });
   } catch (error) {
     console.error('Seeding Error:', error);
-    return NextResponse.json({ error: 'Failed to seed projects' }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : 'Failed to seed projects', details: String(error) }, { status: 500 });
   }
 }

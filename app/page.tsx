@@ -20,11 +20,31 @@ export default function Dashboard() {
   const [monthlyTrend, setMonthlyTrend] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [techStackFilter, setTechStackFilter] = useState('All Tech Stack');
+  const [toolsUsedFilter, setToolsUsedFilter] = useState('All Tools Used');
+  const [allTechOptions, setAllTechOptions] = useState<string[]>([]);
+  const [allToolOptions, setAllToolOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    async function fetchOptions() {
+      try {
+        const [techRes, toolRes] = await Promise.all([
+          fetch('/api/options?type=tech'),
+          fetch('/api/options?type=tool')
+        ]);
+        if (techRes.ok) setAllTechOptions(await techRes.json());
+        if (toolRes.ok) setAllToolOptions(await toolRes.json());
+      } catch (err) {
+        console.error('Failed to load lookup options:', err);
+      }
+    }
+    fetchOptions();
+  }, []);
 
   useEffect(() => {
     async function fetchDashboardData() {
       try {
-        const res = await fetch('/api/dashboard');
+        const res = await fetch(`/api/dashboard?techStack=${techStackFilter}&toolsUsed=${toolsUsedFilter}`);
         if (!res.ok) throw new Error('Failed to fetch dashboard data');
         const data = await res.json();
         setStats(data.stats || null);
@@ -40,7 +60,7 @@ export default function Dashboard() {
       }
     }
     fetchDashboardData();
-  }, []);
+  }, [techStackFilter, toolsUsedFilter]);
 
   if (loading) {
     return (
@@ -56,18 +76,30 @@ export default function Dashboard() {
   return (
     <div className="p-4 md:p-8 min-h-screen">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8 animate-fadeInUp">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 animate-fadeInUp">
         <div>
           <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
           <p className="text-muted-foreground mt-1 text-sm">
             {stats?.totalProjects || 0} projects across your workspace
           </p>
         </div>
-        <Link href="/projects/new">
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-sm">
-            <Plus size={16} /> New Project
-          </button>
-        </Link>
+        <div className="flex items-center gap-2 flex-wrap">
+          <select value={techStackFilter} onChange={e => setTechStackFilter(e.target.value)} className="px-3 py-2 border border-white/10 rounded-xl glass-input text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all bg-slate-950">
+            <option value="All Tech Stack">All Tech Stack</option>
+            {allTechOptions.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <select value={toolsUsedFilter} onChange={e => setToolsUsedFilter(e.target.value)} className="px-3 py-2 border border-white/10 rounded-xl glass-input text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary/50 transition-all bg-slate-950">
+            <option value="All Tools Used">All Tools Used</option>
+            {allToolOptions.map(t => <option key={t} value={t}>{t}</option>)}
+          </select>
+
+          <Link href="/projects/new">
+            <button className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-sm">
+              <Plus size={16} /> New Project
+            </button>
+          </Link>
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -80,7 +112,7 @@ export default function Dashboard() {
       </div>
 
       {/* Analytics Visualization (Recharts) */}
-      <AnalyticsCharts monthlyTrend={monthlyTrend} byPriority={byPriority} projects={projects} />
+      <AnalyticsCharts monthlyTrend={monthlyTrend} byPriority={byPriority} projects={projects} techStackFilter={techStackFilter} toolsUsedFilter={toolsUsedFilter} />
 
       {/* Full-width Status Analytics Chart */}
       <StatusAnalyticsChart data={byStatus} projects={projects} />

@@ -17,6 +17,17 @@ export async function GET(request: NextRequest) {
 
     const projects = await getProjects();
 
+    const techStack = searchParams.get('techStack');
+    const toolsUsed = searchParams.get('toolsUsed');
+
+    let filteredProjects = projects;
+    if (techStack && techStack !== 'All Tech Stack') {
+      filteredProjects = filteredProjects.filter(p => p.techStack && p.techStack.includes(techStack));
+    }
+    if (toolsUsed && toolsUsed !== 'All Tools Used') {
+      filteredProjects = filteredProjects.filter(p => p.toolsUsed && p.toolsUsed.includes(toolsUsed));
+    }
+
     const daysInMonth = new Date(year, month, 0).getDate();
     const dailyData = [];
 
@@ -33,7 +44,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    projects.forEach((project) => {
+    filteredProjects.forEach((project) => {
       // 1. Created Date
       const createdDate = new Date(project.createdAt);
       if (

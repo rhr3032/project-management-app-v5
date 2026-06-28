@@ -269,6 +269,38 @@ export default function ProjectDetailsPage() {
           </Section>
         )}
 
+        {/* Tech Stack & Tools */}
+        {((project.techStack && project.techStack.length > 0) || (project.toolsUsed && project.toolsUsed.length > 0)) && (
+          <Section title="Tech Stack & Tools Used">
+            <div className="space-y-4">
+              {project.techStack && project.techStack.length > 0 && (
+                <div>
+                  <p className="text-[10px] font-bold text-indigo-400 mb-2 uppercase tracking-wider">💻 Tech Stack</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.techStack.map((tech, idx) => (
+                      <span key={idx} className="px-2.5 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 rounded-lg text-xs font-semibold transition-all">
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {project.toolsUsed && project.toolsUsed.length > 0 && (
+                <div className={project.techStack && project.techStack.length > 0 ? "pt-4 border-t border-white/[0.06]" : ""}>
+                  <p className="text-[10px] font-bold text-cyan-400 mb-2 uppercase tracking-wider">🧰 Tools Used</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.toolsUsed.map((tool, idx) => (
+                      <span key={idx} className="px-2.5 py-1 bg-cyan-500/10 border border-cyan-500/20 text-cyan-300 rounded-lg text-xs font-semibold transition-all">
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </Section>
+        )}
+
         {/* Tags */}
         {project.tags && project.tags.length > 0 && (
           <Section icon={<Tag size={14} />} title="Project Tags">

@@ -27,6 +27,8 @@ const updateProjectSchema = z.object({
   targetAudience: z.string().optional(),
   competitors: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  techStack: z.array(z.string()).optional(),
+  toolsUsed: z.array(z.string()).optional(),
   company: z.string().optional(),
 });
 
