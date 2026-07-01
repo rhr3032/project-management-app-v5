@@ -7,6 +7,7 @@ import { ChevronLeft, ExternalLink, Mail, Phone, Target, Users, Tag, Link2, Penc
 import { Project } from '@/types';
 import { StatusBadge, TypeBadge, ProjectTypeBadge, PriorityBadge, EffortBadge, DeviceBadge } from '@/components/badges';
 import { ConfirmDialog } from '@/components/confirm-dialog';
+import { RichTextViewer } from '@/components/rich-text-viewer';
 
 const STATUS_GRADIENTS: Record<string, string> = {
   'Research':             'from-sky-900 via-sky-800 to-slate-900',
@@ -195,10 +196,7 @@ export default function ProjectDetailsPage() {
         {/* Description */}
         {project.description && (
           <Section title="Project Description">
-            <div
-              className="prose-editor text-sm leading-relaxed"
-              dangerouslySetInnerHTML={{ __html: project.description }}
-            />
+            <RichTextViewer content={project.description} />
           </Section>
         )}
 
@@ -231,37 +229,25 @@ export default function ProjectDetailsPage() {
               {project.shortOverview && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-purple-400 mb-2">📄 OVERVIEW</p>
-                  <div
-                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: project.shortOverview }}
-                  />
+                  <RichTextViewer content={project.shortOverview} />
                 </div>
               )}
               {project.businessGoal && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-amber-400 mb-2">🎯 BUSINESS GOAL</p>
-                  <div
-                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: project.businessGoal }}
-                  />
+                  <RichTextViewer content={project.businessGoal} />
                 </div>
               )}
               {project.targetAudience && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-cyan-400 mb-2 flex items-center gap-1"><Users size={12} /> TARGET AUDIENCE</p>
-                  <div
-                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: project.targetAudience }}
-                  />
+                  <RichTextViewer content={project.targetAudience} />
                 </div>
               )}
               {project.competitors && (
                 <div className="p-4 rounded-xl bg-white/[0.04] border border-white/[0.08]">
                   <p className="text-xs font-bold text-rose-400 mb-2">🏆 COMPETITORS</p>
-                  <div
-                    className="prose-editor text-sm text-muted-foreground leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: project.competitors }}
-                  />
+                  <RichTextViewer content={project.competitors} />
                 </div>
               )}
             </div>
