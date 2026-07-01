@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ChevronLeft, Plus, X } from 'lucide-react';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { emitProjectNotification, notifyProjectNotificationsUpdated } from '@/lib/notification-client';
 
 const PROJECT_STATUSES = [
   'Research','Planning','In Progress','Review','On Hold','Completed','Cancelled',
@@ -218,6 +219,20 @@ export default function NewProjectPage() {
         }),
       });
       if (response.ok) {
+        const project = await response.json();
+        emitProjectNotification({
+          id: `optimistic:new-project:${project.id}`,
+          kind: 'new-project',
+          tone: 'info',
+          title: `New project: ${project.name}`,
+          description: `${project.creatorName || 'A new project'} was added to the workspace.`,
+          href: `/projects/${project.id}`,
+          projectId: project.id,
+          projectName: project.name,
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        });
+        notifyProjectNotificationsUpdated();
         router.push('/projects');
       } else {
         const data = await response.json();

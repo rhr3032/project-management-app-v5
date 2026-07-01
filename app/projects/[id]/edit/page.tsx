@@ -7,6 +7,7 @@ import { ChevronLeft, Plus, X } from 'lucide-react';
 import { Project } from '@/types';
 import { RichTextEditor } from '@/components/rich-text-editor';
 import { MultiSelect } from '@/components/ui/multi-select';
+import { emitProjectNotification, notifyProjectNotificationsUpdated } from '@/lib/notification-client';
 
 const PROJECT_STATUSES = [
   'Research','Planning','In Progress','Review','On Hold','Completed','Cancelled',
@@ -209,7 +210,22 @@ export default function EditProjectPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, description, resourceLinks, tags: tagsArray, techStack, toolsUsed }),
       });
-      if (res.ok) router.push(`/projects/${projectId}`);
+      if (res.ok) {
+        emitProjectNotification({
+          id: `optimistic:status:${projectId}:${Date.now()}`,
+          kind: 'status-change',
+          tone: 'info',
+          title: `${formData.name || 'Project'} updated`,
+          description: 'Project changes were saved successfully.',
+          href: `/projects/${projectId}`,
+          projectId,
+          projectName: formData.name || 'Project',
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        });
+        notifyProjectNotificationsUpdated();
+        router.push(`/projects/${projectId}`);
+      }
       else { const d = await res.json(); setError(d.error || 'Failed to update project'); }
     } catch { setError('Network error. Please try again.'); }
     finally { setSaving(false); }

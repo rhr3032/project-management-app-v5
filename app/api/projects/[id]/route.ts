@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { deleteProject, getProject, updateProject } from '@/lib/api';
+import { createProjectStatusChangeNotificationForAllUsers } from '@/lib/notification-service';
 import { z } from 'zod';
 
 const updateProjectSchema = z.object({
@@ -52,9 +53,22 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const { id } = await context.params;
+    const current = await getProject(id);
     const body = await request.json();
     const updates = updateProjectSchema.parse(body);
     const project = await updateProject(id, updates);
+
+    if (project && current && updates.status && updates.status !== current.status) {
+      await createProjectStatusChangeNotificationForAllUsers({
+        id: project.id,
+        name: project.name,
+        status: project.status,
+        deadline: project.deadline,
+        creatorName: project.creatorName,
+        createdAt: new Date(project.createdAt),
+        updatedAt: new Date(project.updatedAt),
+      }, current.status);
+    }
 
     return project
       ? NextResponse.json(project)

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Plus, Calendar, User, TrendingUp } from 'lucide-react';
 import { Project, ProjectStatus } from '@/types';
 import { TypeBadge, ProjectTypeBadge, PriorityBadge } from '@/components/badges';
+import { emitProjectNotification, notifyProjectNotificationsUpdated } from '@/lib/notification-client';
 
 const ALL_STATUSES: ProjectStatus[] = [
   'Research','Planning','In Progress','Review','On Hold','Completed',
@@ -128,6 +129,20 @@ export default function BoardPage() {
         body: JSON.stringify({ status: newStatus }),
       });
       if (!res.ok) throw new Error('Failed');
+
+      emitProjectNotification({
+        id: `optimistic:status:${draggedProject.id}:${newStatus}:${Date.now()}`,
+        kind: 'status-change',
+        tone: 'info',
+        title: `${updatedProject.name} moved to ${newStatus}`,
+        description: `Project status changed from ${previousStatus} to ${newStatus}.`,
+        href: `/projects/${updatedProject.id}`,
+        projectId: updatedProject.id,
+        projectName: updatedProject.name,
+        isRead: false,
+        createdAt: new Date().toISOString(),
+      });
+      notifyProjectNotificationsUpdated();
     } catch {
       // Revert
       setProjectsByStatus(prev => ({

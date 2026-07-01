@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getProject, getProjects, createProject } from '@/lib/api';
+import { createProjectCreatedNotificationForAllUsers } from '@/lib/notification-service';
 import { z } from 'zod';
 
 const projectSchema = z.object({
@@ -54,6 +55,17 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const validatedData = projectSchema.parse(body);
     const project = await createProject(validatedData);
+
+    await createProjectCreatedNotificationForAllUsers({
+      id: project.id,
+      name: project.name,
+      status: project.status,
+      deadline: project.deadline,
+      creatorName: project.creatorName,
+      createdAt: new Date(project.createdAt),
+      updatedAt: new Date(project.updatedAt),
+    });
+
     return NextResponse.json(project, { status: 201 });
   } catch (error) {
     console.error('POST Project Error:', error);
