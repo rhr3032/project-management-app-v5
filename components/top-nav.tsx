@@ -1,8 +1,9 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, LayoutDashboard, FolderOpen, Layout, MoonStar, Settings } from 'lucide-react';
+import { Bell, ChevronDown, LayoutDashboard, FolderOpen, Layout, LogOut, MoonStar, Settings } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
 
 interface NavItem {
@@ -21,6 +22,30 @@ const navItems: NavItem[] = [
 export function TopNav() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handlePointerDown(event: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        setUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 px-4 md:px-6 pt-4">
@@ -80,20 +105,39 @@ export function TopNav() {
           </button>
 
           {user && (
-            <button
-              type="button"
-              onClick={logout}
-              className="flex items-center gap-3 rounded-full border border-white/10 bg-white/4 px-2 py-1.5 pr-4 text-left hover:bg-white/[0.07] transition-all"
-              title="Logout"
-            >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-cyan-500 text-xs font-bold text-white">
-                {(user.name || user.email).charAt(0).toUpperCase()}
-              </div>
-              <span className="hidden lg:flex flex-col min-w-0 text-left leading-tight">
-                <span className="truncate text-sm font-semibold text-foreground">{user.name || 'Admin'}</span>
-                <span className="truncate text-xs text-muted-foreground">{user.email}</span>
-              </span>
-            </button>
+            <div ref={userMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen((open) => !open)}
+                className="flex items-center gap-3 rounded-full border border-white/10 bg-white/4 px-2 py-1.5 pr-3 text-left hover:bg-white/[0.07] transition-all"
+                title="Account menu"
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-cyan-500 text-xs font-bold text-white">
+                  {(user.name || user.email).charAt(0).toUpperCase()}
+                </div>
+                <span className="hidden lg:flex flex-col min-w-0 text-left leading-tight">
+                  <span className="truncate text-sm font-semibold text-foreground">{user.name || 'Admin'}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
+                </span>
+                <ChevronDown size={14} className={`text-muted-foreground transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-white/10 bg-[#101526] shadow-xl shadow-black/30">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      logout();
+                    }}
+                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-white/6"
+                  >
+                    <LogOut size={16} className="text-muted-foreground" />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
