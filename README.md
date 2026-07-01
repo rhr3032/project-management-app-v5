@@ -1,4 +1,4 @@
-# Project Hub - Project Management Web App
+# Projectory - Project Management Web App
 
 A modern, high-performance project management application built with Next.js and Prisma ORM, featuring a gorgeous dark glassmorphic user interface.
 
