@@ -73,7 +73,6 @@ export default function ProjectDetailsPage() {
   );
 
   const gradient = STATUS_GRADIENTS[project.status] || 'from-indigo-900 via-indigo-800 to-slate-900';
-
   const Section = ({ icon, title, children, className = '' }: { icon?: React.ReactNode; title: string; children: React.ReactNode; className?: string }) => (
     <div className={`glass-card p-6 ${className}`}>
       <h3 className="text-xs font-bold text-muted-foreground mb-5 flex items-center gap-2 uppercase tracking-wider">
