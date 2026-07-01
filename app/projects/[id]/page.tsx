@@ -151,6 +151,11 @@ export default function ProjectDetailsPage() {
             <StatusBadge status={project.status} />
             <PriorityBadge priority={project.priority} />
             <EffortBadge effort={project.effort} />
+            {project.industry && (
+              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 border border-amber-500/30 text-amber-300">
+                {project.industry}
+              </span>
+            )}
             {project.device && <DeviceBadge device={project.device} />}
           </div>
         </div>
@@ -160,23 +165,48 @@ export default function ProjectDetailsPage() {
 
         {/* Row 1: Creator & Company | Current Status + Status History */}
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Left: Creator & Company */}
-          <Section title="Creator & Company">
-            <div className="space-y-4">
-              <div>
-                <p className="text-xs text-muted-foreground font-semibold mb-1">CREATOR NAME</p>
-                <p className="text-lg font-bold text-foreground">{project.creatorName || '—'}</p>
+          {/* Left: Creator & Company + Client */}
+          <div className="flex flex-col gap-4">
+            <Section title="Creator & Company">
+              <div className="space-y-4">
+                <div>
+                  <p className="text-xs text-muted-foreground font-semibold mb-1">CREATOR NAME</p>
+                  <p className="text-lg font-bold text-foreground">{project.creatorName || '—'}</p>
+                </div>
+                <div className="pt-4 border-t border-white/[0.06]">
+                  <p className="text-xs text-muted-foreground font-semibold mb-1">COMPANY</p>
+                  <p className="text-base font-semibold text-foreground">{project.company || '—'}</p>
+                </div>
               </div>
-              <div className="pt-4 border-t border-white/[0.06]">
-                <p className="text-xs text-muted-foreground font-semibold mb-1">COMPANY</p>
-                <p className="text-base font-semibold text-foreground">{project.company || '—'}</p>
+            </Section>
+
+            <Section title="Client Information">
+              <div className="grid sm:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] gap-y-3 gap-x-0">
+                <div className="sm:col-span-2">
+                  <p className="text-[10px] text-muted-foreground font-semibold mb-1">NAME</p>
+                  <p className="text-sm font-semibold text-foreground">{project.clientName || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-semibold mb-1 flex items-center gap-1"><Phone size={11} /> PHONE</p>
+                  {project.clientPhone
+                    ? <a href={`tel:${project.clientPhone}`} className="text-sm font-semibold text-indigo-400 hover:underline">{project.clientPhone}</a>
+                    : <p className="text-sm text-muted-foreground">—</p>}
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground font-semibold mb-1 flex items-center gap-1"><Mail size={11} /> EMAIL</p>
+                  {project.clientEmail
+                    ? <a href={`mailto:${project.clientEmail}`} className="text-sm font-semibold text-indigo-400 hover:underline break-all">{project.clientEmail}</a>
+                    : <p className="text-sm text-muted-foreground">—</p>}
+                </div>
+                {project.clientAddress && (
+                  <div className="sm:col-span-2">
+                    <p className="text-[10px] text-muted-foreground font-semibold mb-1">ADDRESS</p>
+                    <p className="text-xs font-semibold text-foreground">{project.clientAddress}</p>
+                  </div>
+                )}
               </div>
-              <div className="pt-4 border-t border-white/[0.06]">
-                <p className="text-xs text-muted-foreground font-semibold mb-1">INDUSTRY</p>
-                <p className="text-base font-semibold text-foreground">{project.industry || '—'}</p>
-              </div>
-            </div>
-          </Section>
+            </Section>
+          </div>
 
           {/* Right column: Current Status card + Status History log stacked */}
           <div className="flex flex-col gap-4">
@@ -267,36 +297,6 @@ export default function ProjectDetailsPage() {
             </div>
           </div>
         </div>
-
-        {/* Client */}
-        {(project.clientName || project.clientEmail || project.clientPhone || project.clientAddress) && (
-          <Section icon="👤" title="Client Information">
-            <div className="grid sm:grid-cols-3 gap-6">
-              <div>
-                <p className="text-xs text-muted-foreground font-semibold mb-1">NAME</p>
-                <p className="font-semibold text-foreground">{project.clientName || '—'}</p>
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-semibold mb-1 flex items-center gap-1"><Mail size={12} /> EMAIL</p>
-                {project.clientEmail
-                  ? <a href={`mailto:${project.clientEmail}`} className="font-semibold text-indigo-400 hover:underline break-all">{project.clientEmail}</a>
-                  : <p className="text-muted-foreground">—</p>}
-              </div>
-              <div>
-                <p className="text-xs text-muted-foreground font-semibold mb-1 flex items-center gap-1"><Phone size={12} /> PHONE</p>
-                {project.clientPhone
-                  ? <a href={`tel:${project.clientPhone}`} className="font-semibold text-indigo-400 hover:underline">{project.clientPhone}</a>
-                  : <p className="text-muted-foreground">—</p>}
-              </div>
-            </div>
-            {project.clientAddress && (
-              <div className="mt-4 pt-4 border-t border-white/[0.06]">
-                <p className="text-xs text-muted-foreground font-semibold mb-1 flex items-center gap-1">📍 ADDRESS</p>
-                <p className="text-sm font-semibold text-foreground">{project.clientAddress}</p>
-              </div>
-            )}
-          </Section>
-        )}
 
         {/* Description */}
         {project.description && (

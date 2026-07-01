@@ -195,63 +195,65 @@ export function TopNav() {
           >
             <MoonStar size={18} />
           </button>
-          <button
-            type="button"
-            onClick={() => {
-              setNotificationMenuOpen((open) => !open);
-              setUserMenuOpen(false);
-            }}
-            className="hidden sm:inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/6 hover:text-foreground transition-all relative"
-            aria-label="Notifications"
-          >
-            <Bell size={18} />
-            {unreadCount > 0 && (
-              <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-400 px-1 text-[10px] font-bold text-white ring-2 ring-background">
-                {unreadCount > 9 ? '9+' : unreadCount}
-              </span>
-            )}
-          </button>
+          <div ref={notificationMenuRef} className="relative hidden sm:block">
+            <button
+              type="button"
+              onClick={() => {
+                setNotificationMenuOpen((open) => !open);
+                setUserMenuOpen(false);
+              }}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-muted-foreground hover:bg-white/6 hover:text-foreground transition-all relative"
+              aria-label="Notifications"
+            >
+              <Bell size={18} />
+              {unreadCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-400 px-1 text-[10px] font-bold text-white ring-2 ring-background">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </button>
 
-          {notificationMenuOpen && (
-            <div ref={notificationMenuRef} className="absolute right-4 top-20 z-50 w-88 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-white/10 bg-[#101526] shadow-xl shadow-black/30">
-              <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
-                <div>
-                  <p className="text-sm font-semibold text-foreground">Notifications</p>
-                  <p className="text-xs text-muted-foreground">{unreadCount} unread alerts</p>
-                </div>
-                <Link
-                  href="/notifications"
-                  onClick={() => setNotificationMenuOpen(false)}
-                  className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
-                >
-                  View all
-                </Link>
-              </div>
-
-              <div className="max-h-112 overflow-y-auto">
-                {notifications.length === 0 ? (
-                  <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-                    No project notifications right now.
+            {notificationMenuOpen && (
+              <div className="absolute right-0 top-full mt-2 z-50 w-88 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-white/10 bg-[#101526] shadow-xl shadow-black/30">
+                <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground">Notifications</p>
+                    <p className="text-xs text-muted-foreground">{unreadCount} unread alerts</p>
                   </div>
-                ) : (
-                  notifications.map((notification) => (
-                    <Link
-                      key={notification.id}
-                      href={notification.href}
-                      onClick={() => handleNotificationClick(notification.id)}
-                      className="flex items-start gap-3 border-t border-white/5 px-4 py-3 transition-colors hover:bg-white/6"
-                    >
-                      <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${toneClasses[notification.tone]} shadow-sm`} />
-                      <span className="min-w-0 flex-1">
-                        <span className="block text-sm font-semibold text-foreground">{notification.title}</span>
-                        <span className="block text-xs leading-relaxed text-muted-foreground">{notification.description}</span>
-                      </span>
-                    </Link>
-                  ))
-                )}
+                  <Link
+                    href="/notifications"
+                    onClick={() => setNotificationMenuOpen(false)}
+                    className="text-xs font-medium text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    View all
+                  </Link>
+                </div>
+
+                <div className="max-h-112 overflow-y-auto">
+                  {notifications.length === 0 ? (
+                    <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+                      No project notifications right now.
+                    </div>
+                  ) : (
+                    notifications.map((notification) => (
+                      <Link
+                        key={notification.id}
+                        href={notification.href}
+                        onClick={() => handleNotificationClick(notification.id)}
+                        className="flex items-start gap-3 border-t border-white/5 px-4 py-3 transition-colors hover:bg-white/6"
+                      >
+                        <span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${toneClasses[notification.tone]} shadow-sm`} />
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold text-foreground">{notification.title}</span>
+                          <span className="block text-xs leading-relaxed text-muted-foreground">{notification.description}</span>
+                        </span>
+                      </Link>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {user && (
             <div ref={userMenuRef} className="relative">
