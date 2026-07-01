@@ -35,6 +35,15 @@ export interface Project {
   company: string;
   createdAt: string;
   updatedAt: string;
+  statusLogs?: ProjectStatusLog[];
+}
+
+export interface ProjectStatusLog {
+  id: string;
+  projectId: string;
+  fromStatus: string;
+  toStatus: string;
+  changedAt: string;
 }
 
 export interface DashboardStats {

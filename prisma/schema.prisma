@@ -48,6 +48,7 @@ model Project {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   notifications  Notification[]
+  statusLogs     ProjectStatusLog[]
 }
 
 model Notification {
@@ -69,6 +70,15 @@ model Notification {
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model ProjectStatusLog {
+  id         String   @id @default(cuid())
+  projectId  String
+  fromStatus String   @default("")
+  toStatus   String
+  changedAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
 
 model TechOption {

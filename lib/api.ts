@@ -41,7 +41,7 @@ function toResourceLinks(value: Prisma.JsonValue): Project['resourceLinks'] {
     .map((item) => ({ url: item.url, title: item.title }));
 }
 
-function toProject(project: PrismaProject): Project {
+function toProject(project: PrismaProject & { statusLogs?: { id: string; projectId: string; fromStatus: string; toStatus: string; changedAt: Date }[] }): Project {
   return {
     ...project,
     resourceLinks: toResourceLinks(project.resourceLinks),
@@ -50,6 +50,10 @@ function toProject(project: PrismaProject): Project {
     toolsUsed: toStringArray(project.toolsUsed),
     createdAt: project.createdAt.toISOString(),
     updatedAt: project.updatedAt.toISOString(),
+    statusLogs: project.statusLogs?.map((log) => ({
+      ...log,
+      changedAt: log.changedAt.toISOString(),
+    })),
   } as Project;
 }
 
@@ -86,14 +90,29 @@ export async function getProjects(): Promise<Project[]> {
 export async function getProject(id: string): Promise<Project | null> {
   const project = await getPrisma().project.findUnique({
     where: { id },
+    include: {
+      statusLogs: {
+        orderBy: { changedAt: 'desc' },
+      },
+    },
   });
 
   return project ? toProject(project) : null;
 }
 
 export async function createProject(project: ProjectInput): Promise<Project> {
-  const created = await getPrisma().project.create({
+  const prisma = getPrisma();
+  const created = await prisma.project.create({
     data: toProjectCreateData(project),
+  });
+
+  // Record initial status log
+  await prisma.projectStatusLog.create({
+    data: {
+      projectId: created.id,
+      fromStatus: '',
+      toStatus: created.status,
+    },
   });
 
   return toProject(created);
@@ -101,10 +120,28 @@ export async function createProject(project: ProjectInput): Promise<Project> {
 
 export async function updateProject(id: string, updates: ProjectUpdateInput): Promise<Project | null> {
   try {
-    const updated = await getPrisma().project.update({
+    const prisma = getPrisma();
+
+    // Fetch current status before update
+    const current = updates.status
+      ? await prisma.project.findUnique({ where: { id }, select: { status: true } })
+      : null;
+
+    const updated = await prisma.project.update({
       where: { id },
       data: toProjectUpdateData(updates),
     });
+
+    // If status changed, record a log entry
+    if (current && updates.status && updates.status !== current.status) {
+      await prisma.projectStatusLog.create({
+        data: {
+          projectId: id,
+          fromStatus: current.status,
+          toStatus: updates.status,
+        },
+      });
+    }
 
     return toProject(updated);
   } catch (error) {

@@ -29,6 +29,34 @@ const STATUS_GRADIENTS: Record<string, string> = {
   'Closed':               'from-gray-800 via-gray-700 to-slate-900',
 };
 
+const STATUS_COLORS: Record<string, { dot: string; label: string; ring: string }> = {
+  'Research':             { dot: 'bg-sky-400',      label: 'text-sky-300',      ring: 'ring-sky-500/30' },
+  'Planning':             { dot: 'bg-blue-400',     label: 'text-blue-300',     ring: 'ring-blue-500/30' },
+  'In Progress':          { dot: 'bg-orange-400',   label: 'text-orange-300',   ring: 'ring-orange-500/30' },
+  'Review':               { dot: 'bg-purple-400',   label: 'text-purple-300',   ring: 'ring-purple-500/30' },
+  'On Hold':              { dot: 'bg-yellow-400',   label: 'text-yellow-300',   ring: 'ring-yellow-500/30' },
+  'Completed':            { dot: 'bg-green-400',    label: 'text-green-300',    ring: 'ring-green-500/30' },
+  'Cancelled':            { dot: 'bg-red-400',      label: 'text-red-300',      ring: 'ring-red-500/30' },
+  'Archived':             { dot: 'bg-slate-400',    label: 'text-slate-300',    ring: 'ring-slate-500/30' },
+  'Pending Approval':     { dot: 'bg-amber-400',    label: 'text-amber-300',    ring: 'ring-amber-500/30' },
+  'Approved':             { dot: 'bg-emerald-400',  label: 'text-emerald-300',  ring: 'ring-emerald-500/30' },
+  'Rejected':             { dot: 'bg-rose-400',     label: 'text-rose-300',     ring: 'ring-rose-500/30' },
+  'Needs Revision':       { dot: 'bg-pink-400',     label: 'text-pink-300',     ring: 'ring-pink-500/30' },
+  'In Testing':           { dot: 'bg-violet-400',   label: 'text-violet-300',   ring: 'ring-violet-500/30' },
+  'Ready for Deployment': { dot: 'bg-teal-400',     label: 'text-teal-300',     ring: 'ring-teal-500/30' },
+  'Deployed':             { dot: 'bg-cyan-400',     label: 'text-cyan-300',     ring: 'ring-cyan-500/30' },
+  'Maintenance':          { dot: 'bg-indigo-400',   label: 'text-indigo-300',   ring: 'ring-indigo-500/30' },
+  'Closed':               { dot: 'bg-gray-400',     label: 'text-gray-300',     ring: 'ring-gray-500/30' },
+};
+
+function formatLogDate(iso: string) {
+  const d = new Date(iso);
+  return {
+    date: d.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+    time: d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+  };
+}
+
 export default function ProjectDetailsPage() {
   const params = useParams();
   const router = useRouter();
@@ -74,6 +102,9 @@ export default function ProjectDetailsPage() {
   );
 
   const gradient = STATUS_GRADIENTS[project.status] || 'from-indigo-900 via-indigo-800 to-slate-900';
+  const statusColor = STATUS_COLORS[project.status] || { dot: 'bg-indigo-400', label: 'text-indigo-300', ring: 'ring-indigo-500/30' };
+  const statusLogs = project.statusLogs ?? [];
+
   const Section = ({ icon, title, children, className = '' }: { icon?: React.ReactNode; title: string; children: React.ReactNode; className?: string }) => (
     <div className={`glass-card p-6 ${className}`}>
       <h3 className="text-xs font-bold text-muted-foreground mb-5 flex items-center gap-2 uppercase tracking-wider">
@@ -126,8 +157,10 @@ export default function ProjectDetailsPage() {
       </div>
 
       <div className="max-w-5xl mx-auto px-4 md:px-8 py-8 space-y-6 animate-fadeInUp mt-6">
-        {/* Owner/Creator & Timeline */}
+
+        {/* Row 1: Creator & Company | Current Status + Status History */}
         <div className="grid md:grid-cols-2 gap-6">
+          {/* Left: Creator & Company */}
           <Section title="Creator & Company">
             <div className="space-y-4">
               <div>
@@ -145,22 +178,94 @@ export default function ProjectDetailsPage() {
             </div>
           </Section>
 
-          <Section icon="📅" title="Project Timeline">
-            <div className="space-y-3">
-              {[
-                { label: 'Start', value: project.startDate },
-                { label: 'End', value: project.endDate },
-                { label: 'Deadline', value: project.deadline },
-              ].map(({ label, value }) => (
-                <div key={label} className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">{label}</span>
-                  <span className={`font-semibold text-sm ${label === 'Deadline' ? 'text-indigo-400' : 'text-foreground'}`}>
-                    {value ? new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
-                  </span>
-                </div>
-              ))}
+          {/* Right column: Current Status card + Status History log stacked */}
+          <div className="flex flex-col gap-4">
+            {/* Current Status Card */}
+            <div className="glass-card p-5">
+              <h3 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wider">
+                🟢 Current Status
+              </h3>
+              <div className={`flex items-center gap-3 p-3 rounded-xl bg-white/[0.04] ring-1 ${statusColor.ring}`}>
+                <span className={`w-3 h-3 rounded-full flex-shrink-0 ${statusColor.dot} shadow-lg animate-pulse`} />
+                <span className={`text-lg font-bold ${statusColor.label}`}>{project.status}</span>
+              </div>
+              {/* Timeline condensed under current status */}
+              <div className="mt-4 pt-3 border-t border-white/[0.06] space-y-2">
+                {[
+                  { label: 'Start', value: project.startDate },
+                  { label: 'End', value: project.endDate },
+                  { label: 'Deadline', value: project.deadline },
+                ].map(({ label, value }) => (
+                  <div key={label} className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">{label}</span>
+                    <span className={`font-semibold text-xs ${label === 'Deadline' ? 'text-indigo-400' : 'text-foreground'}`}>
+                      {value ? new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </Section>
+
+            {/* Status History Log */}
+            <div className="glass-card p-5 flex flex-col flex-1">
+              <h3 className="text-xs font-bold text-muted-foreground mb-3 flex items-center gap-2 uppercase tracking-wider">
+                📋 Status History
+              </h3>
+
+              {statusLogs.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center">
+                  <p className="text-xs text-muted-foreground italic">No status changes recorded yet.</p>
+                </div>
+              ) : (
+                <div
+                  className="space-y-2 overflow-y-auto pr-1"
+                  style={{ maxHeight: '152px' }}
+                >
+                  {statusLogs.map((log, idx) => {
+                    const { date, time } = formatLogDate(log.changedAt);
+                    const toColor = STATUS_COLORS[log.toStatus] || { dot: 'bg-indigo-400', label: 'text-indigo-300' };
+                    const isFirst = idx === 0;
+                    return (
+                      <div
+                        key={log.id}
+                        className={`flex items-start gap-3 p-2.5 rounded-lg transition-all ${isFirst ? 'bg-white/[0.06] ring-1 ring-white/10' : 'bg-white/[0.02]'}`}
+                      >
+                        {/* Timeline dot */}
+                        <div className="flex flex-col items-center pt-0.5 gap-1 flex-shrink-0">
+                          <span className={`w-2.5 h-2.5 rounded-full ${toColor.dot} ${isFirst ? 'shadow-md' : 'opacity-60'}`} />
+                          {idx < statusLogs.length - 1 && (
+                            <span className="w-px h-3 bg-white/10" />
+                          )}
+                        </div>
+                        {/* Content */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            {log.fromStatus ? (
+                              <>
+                                <span className="text-[10px] text-muted-foreground font-medium truncate">{log.fromStatus}</span>
+                                <span className="text-[10px] text-muted-foreground">→</span>
+                              </>
+                            ) : (
+                              <span className="text-[10px] text-muted-foreground italic">Created as</span>
+                            )}
+                            <span className={`text-[11px] font-bold ${toColor.label} truncate`}>{log.toStatus}</span>
+                            {isFirst && (
+                              <span className="ml-auto text-[9px] font-bold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded-full ring-1 ring-emerald-500/20 flex-shrink-0">
+                                CURRENT
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">
+                            {date} · {time}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Client */}
