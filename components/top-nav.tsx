@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Bell, ChevronDown, LayoutDashboard, FolderOpen, Layout, LogOut, MoonStar, Settings } from 'lucide-react';
+import { Bell, ChevronDown, LayoutDashboard, FolderOpen, Layout, LogOut, MoonStar, Settings, UserCircle2 } from 'lucide-react';
 import { useAuth } from '@/components/auth-provider';
 
 interface NavItem {
@@ -16,7 +16,6 @@ const navItems: NavItem[] = [
   { icon: <LayoutDashboard size={16} />, label: 'Dashboard', href: '/' },
   { icon: <FolderOpen size={16} />, label: 'Projects', href: '/projects' },
   { icon: <Layout size={16} />, label: 'Board', href: '/board' },
-  { icon: <Settings size={16} />, label: 'Settings', href: '#' },
 ];
 
 export function TopNav() {
@@ -124,13 +123,25 @@ export function TopNav() {
 
               {userMenuOpen && (
                 <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-2xl border border-white/10 bg-[#101526] shadow-xl shadow-black/30">
+                  <Link href="/profile" onClick={() => setUserMenuOpen(false)}>
+                    <div className="flex items-center gap-2 px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-white/6">
+                      <UserCircle2 size={16} className="text-muted-foreground" />
+                      Profile
+                    </div>
+                  </Link>
+                  <Link href="/settings" onClick={() => setUserMenuOpen(false)}>
+                    <div className="flex items-center gap-2 px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-white/6 border-t border-white/10">
+                      <Settings size={16} className="text-muted-foreground" />
+                      Settings
+                    </div>
+                  </Link>
                   <button
                     type="button"
                     onClick={() => {
                       setUserMenuOpen(false);
                       logout();
                     }}
-                    className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-white/6"
+                    className="flex w-full items-center gap-2 border-t border-white/10 px-4 py-3 text-left text-sm font-medium text-foreground transition-colors hover:bg-white/6"
                   >
                     <LogOut size={16} className="text-muted-foreground" />
                     Logout
