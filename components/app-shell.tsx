@@ -2,7 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/components/auth-provider';
-import { Sidebar } from '@/components/sidebar';
+import { TopNav } from '@/components/top-nav';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,9 +16,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <main className="flex-1 overflow-auto md:ml-56 lg:ml-64">
+    <div className="min-h-screen">
+      <TopNav />
+      <main className="mx-auto max-w-[1400px] px-4 md:px-6 pb-6 pt-6">
         {children}
       </main>
     </div>
