@@ -23,8 +23,8 @@ const filterButtons: Array<{ value: FilterMode; label: string }> = [
 export default function NotificationsPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(() => getCachedProjectNotifications());
+  const [unreadCount, setUnreadCount] = useState(() => getCachedProjectNotifications().filter((item) => !item.isRead).length);
   const [filter, setFilter] = useState<FilterMode>('all');
 
   const fetchNotifications = async (isRefresh = false) => {
@@ -53,6 +53,13 @@ export default function NotificationsPage() {
   };
 
   useEffect(() => {
+    const cachedNotifications = getCachedProjectNotifications();
+    if (cachedNotifications.length > 0) {
+      setNotifications(cachedNotifications);
+      setUnreadCount(cachedNotifications.filter((item) => !item.isRead).length);
+      setLoading(false);
+    }
+
     fetchNotifications();
 
     const handleProjectNotificationCreated = (event: Event) => {
