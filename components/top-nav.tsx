@@ -152,9 +152,9 @@ export function TopNav() {
       <div className="glass-sidebar mx-auto flex h-16 max-w-7xl items-center gap-3 rounded-2xl px-4 md:px-5 shadow-lg shadow-black/20">
         <Link href="/" className="flex items-center gap-3 shrink-0">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-500 text-white font-bold text-sm shadow-md shadow-blue-500/30">
-            D
+            P
           </div>
-          <span className="hidden sm:block text-sm font-medium text-foreground">Your Brand</span>
+          <span className="hidden sm:block text-sm font-medium text-foreground">Projectory</span>
         </Link>
 
         <nav className="hidden md:flex flex-1 items-center justify-center gap-1 overflow-x-auto">
