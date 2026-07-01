@@ -1,148 +1,273 @@
 # Projectory - Project Management Web App
 
-A modern, high-performance project management application built with Next.js and Prisma ORM, featuring a gorgeous dark glassmorphic user interface.
+Projectory is a full-stack project management dashboard for planning, tracking, and reviewing digital projects across design, web development, and mobile app work. It combines project records, analytics, workflow status tracking, rich project documentation, client details, resource links, notifications, and a drag-and-drop Kanban board in one responsive dark glassmorphic interface.
 
-## Core Features
+## Preview
 
-### 1. Dashboard Overview
-- **Metrics Grid** - 5 key metrics cards with live counts:
-  - **Total Projects**
-  - **In Progress Projects**
-  - **Completed Projects**
-  - **Critical Priority Projects**
-  - **Important Priority Projects** (added statistics card)
-- **Project Velocity (Daily Trends)** - Interactive area chart detailing daily created, completed, and closed projects.
-  - Supports separate **Month and Year filters** that dynamically fetch daily data.
-  - X-axis renders all day ticks cleanly.
-- **Priority Distribution (Projects by Priority)** - Dynamic bar chart displaying project counts for key priorities:
-  - Displays exactly 8 sorted priorities: `Critical`, `Urgent`, `High`, `Important`, `Major`, `Minor`, `Low`, and `Quick Win`.
-  - Supports separate **Month and Year filters** that run instant client-side updates.
-- **Status Distribution (Projects by Status)** - Full-width dynamic bar chart tracking workflow progression.
-  - Displays exactly 14 target statuses: `Research`, `In Progress`, `Review`, `On Hold`, `Completed`, `Cancelled`, `Pending Approval`, `Approved`, `Rejected`, `In Testing`, `Needs Revision`, `Maintenance`, `Deployed`, and `Ready for Deployment`.
-  - Supports separate **Month and Year filters** with instant client-side re-aggregation.
+![Projectory app preview](./public/preview.png)
 
-### 2. Projects List & Filtering
-- Interactive list layout showing project cards with badges, metadata, and tags.
-- Search by project name, description, or **Creator Name** (formerly Owner Name).
-- Powerful dropdown filters for **Project Type**, **Category**, **Priority**, and **Device**.
-- Sort options by newest or oldest project first.
+## Features
 
-### 3. Project Creation & Editing
-- Comprehensive multi-section forms for adding and modifying projects:
-  - **Standard Fields** - Name, Category, High-level Type, Status, Priority, Effort, and Device.
-  - **Creator Name** - Renamed from Owner Name across the application.
-  - **Client Information** - Client Name, Email, Phone, and **Client Address** (text input).
-  - **Industry** - Required dropdown selection mapped to 38 sorted options.
-  - **Resource Links** - Dynamic URL and Title fields.
-  - **Project Strategy (WYSIWYG)** - Interactive rich-text editors powered by TipTap for editing *Short Overview*, *Business Goal*, *Target Audience*, and *Competitors*.
+### Dashboard
 
-### 4. Kanban Board
-- Visual project pipeline grouped into columns by status.
-- Cards show priorities, creators, tags, and formatted deadlines.
+- Workspace overview with live project metrics.
+- Stat cards for total projects, in-progress projects, completed projects, critical priority, and important priority.
+- Project velocity chart for recent project creation trends.
+- Priority distribution chart across critical, urgent, high, important, major, minor, low, and quick-win work.
+- Status distribution chart across the full workflow.
+- Project type chart for UI/UX Design, Web Development, and Mobile App Development.
+- Recent projects and critical items sections.
+- Dashboard filtering by Tech Stack and Tools Used.
 
----
+### Project Management
+
+- Create, view, edit, and delete projects.
+- Search projects by name, description, creator name, and company.
+- Filter projects by status, project type, category, priority, device, tech stack, and tools used.
+- Sort projects by newest, oldest, name A-Z, and name Z-A.
+- Project cards with badges, metadata, tech/tool chips, creator details, company, and end date.
+- Delete confirmation dialog to prevent accidental removals.
+
+### Project Forms
+
+- Multi-section project creation and editing workflow.
+- Project information fields for name, high-level project type, category, status, priority, effort, device, creator, company, and industry.
+- Timeline fields for start date, end date, and deadline.
+- Client information fields for name, email, phone, and address.
+- Preview link and dynamic resource links with title and URL.
+- Rich text project description.
+- Rich text strategy fields for short overview, business goal, target audience, and competitors.
+- Tags, Tech Stack, and Tools Used support.
+
+### Project Details
+
+- Dedicated details page for each project.
+- Status-aware hero header and badge system.
+- Creator, company, client, timeline, links, strategy, tech stack, tools, and tags sections.
+- Rich text rendering for project descriptions and strategy content.
+- Status history log showing project creation status and later status transitions.
+- Quick edit and delete actions.
+
+### Kanban Board
+
+- Horizontal Kanban board grouped by project status.
+- Supports 17 workflow states: Research, Planning, In Progress, Review, On Hold, Completed, Cancelled, Archived, Pending Approval, Approved, Rejected, Needs Revision, In Testing, Ready for Deployment, Deployed, Maintenance, and Closed.
+- Drag and drop projects between status columns.
+- Status updates are saved through the API and logged in project history.
+- Board filtering by Tech Stack and Tools Used.
+- Compact project cards with priority, type, creator, and deadline.
+
+### Authentication
+
+- Login page and session-aware auth provider.
+- API routes for login, logout, current user, and admin/user seeding.
+- Password hashing with bcryptjs.
+- JWT-based authentication helpers.
+
+### Notifications
+
+- In-app notification data model and notification routes.
+- Project creation notifications.
+- Project status change notifications.
+- Read/unread support and active notification filtering.
+- Client-side notification update events for responsive UI refreshes.
+
+### Data And Lookup Options
+
+- PostgreSQL-backed project records through Prisma ORM.
+- Tech Stack and Tools Used lookup tables.
+- JSON storage for tags, resource links, tech stack, and tools used.
+- Project status log table for workflow history.
+- `creatorName` is mapped to the database `owner` column for backward compatibility.
 
 ## Tech Stack
 
-### Frontend & App Framework
-- **Next.js 16** (App Router with Turbopack)
-- **React 19**
-- **Tailwind CSS v4** (Modern utilities and glassmorphic UI design)
-- **Recharts** (Interactive charting library)
-- **TipTap** (Rich text editing system)
-- **Lucide React** (Modern SVG icon system)
+### Frontend
 
-### Backend & Database
-- **Next.js Route Handlers** (API Endpoints)
-- **Prisma ORM** (Database schema management & queries)
-- **Neon PostgreSQL** (Serverless cloud database provider)
-- **Zod** (Request payload validation)
-- **Bcryptjs** (Password hashing)
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Recharts
+- TipTap rich text editor
+- Lucide React icons
+- Base UI and shadcn-style local components
 
----
+### Backend
 
-## Database Integration
+- Next.js Route Handlers
+- Prisma ORM 7
+- PostgreSQL / Neon PostgreSQL
+- Zod validation
+- bcryptjs password hashing
+- jsonwebtoken authentication
+- Node.js `pg` database driver
 
-The application is fully integrated with PostgreSQL. The database schema in prisma/schema.prisma maps the logical `creatorName` to the underlying PostgreSQL `owner` column using `@map("owner")` to maintain full database backward compatibility.
+### Tooling
 
-### Setting Up Environment Variables
+- npm scripts
+- Prisma Client generation
+- TypeScript configuration
+- PostCSS and Tailwind CSS
+- Vercel Analytics package included
 
-Create a `.env.local` file in the project root:
+## Main Functions
 
-```env
-# Neon PostgreSQL Connection String
-DATABASE_URL="postgresql://username:password@hostname/neondb?sslmode=require"
+### Project Workflow
 
-# API URL Configuration
-NEXT_PUBLIC_API_URL=http://localhost:3000
-```
+- Add a project with complete business, client, timeline, strategy, and technical metadata.
+- Browse all projects in a searchable, filterable list.
+- Open a project details page for full context.
+- Edit project data without losing status history.
+- Delete projects with confirmation.
+- Move projects across workflow stages from the Kanban board.
+- Track every status change in a project history log.
 
-### Syncing the Database
+### Analytics Workflow
 
-To push the database schema and generate the Prisma Client, run:
+- Load dashboard totals from the database.
+- Group projects by status, type, and priority.
+- Show recent monthly project trends.
+- Filter analytics by selected tech stack and tools.
+- Keep chart labels stable even when some categories have zero projects.
+
+### Notification Workflow
+
+- Generate notifications when a project is created.
+- Generate notifications when a project status changes.
+- Fetch notifications for the authenticated user.
+- Mark notification records as read or keep only active items visible.
+
+## API Routes
+
+| Route | Method | Purpose |
+| --- | --- | --- |
+| `/api/projects` | `GET` | List all projects |
+| `/api/projects` | `POST` | Create a project |
+| `/api/projects?id={id}` | `GET` | Fetch one project by query id |
+| `/api/projects/[id]` | `GET` | Fetch one project by route id |
+| `/api/projects/[id]` | `PATCH` | Update project fields or status |
+| `/api/projects/[id]` | `DELETE` | Delete a project |
+| `/api/projects/seed` | `GET` | Seed sample project data |
+| `/api/dashboard` | `GET` | Fetch dashboard stats and grouped analytics |
+| `/api/dashboard/velocity` | `GET` | Fetch daily project velocity data |
+| `/api/options?type=tech` | `GET` | Fetch tech stack lookup options |
+| `/api/options?type=tool` | `GET` | Fetch tools lookup options |
+| `/api/auth/login` | `POST` | Log in a user |
+| `/api/auth/logout` | `POST` | Log out a user |
+| `/api/auth/me` | `GET` | Fetch the current authenticated user |
+| `/api/auth/seed` | `POST` | Seed an initial auth user |
+| `/api/notifications` | `GET` | Fetch notifications for the current user |
+| `/api/notifications/[id]` | `PATCH` | Update a notification, such as marking it read |
+
+## Database Models
+
+- `User`: authenticated users with email, hashed password, name, and notification relation.
+- `Project`: complete project record with metadata, client details, rich text fields, JSON arrays, timestamps, and workflow relations.
+- `Notification`: in-app notification records tied to users and projects.
+- `ProjectStatusLog`: status transition history for each project.
+- `TechOption`: reusable tech stack options.
+- `ToolOption`: reusable tools-used options.
+
+## Getting Started
+
+### 1. Install dependencies
 
 ```bash
-# Push schema to PostgreSQL
-npm run db:push
+npm install
+```
 
-# Generate Prisma Client
+### 2. Configure environment variables
+
+Create `.env.local` in the project root:
+
+```env
+DATABASE_URL="postgresql://user:password@host.neon.tech/dbname?sslmode=require"
+NEXT_PUBLIC_API_URL="http://localhost:3000"
+NODE_ENV="development"
+```
+
+### 3. Generate Prisma Client
+
+```bash
 npm run prisma:generate
 ```
 
-### Seeding Test Data
+### 4. Push the database schema
 
-A database seeder is included to seed 15 realistic projects with varied statuses, timelines, and priorities. To seed, run the development server and access `/api/projects/seed` via your browser or run:
+```bash
+npm run db:push
+```
+
+### 5. Run the development server
+
+```bash
+npm run dev
+```
+
+Open `http://localhost:3000` in your browser.
+
+## Available Scripts
+
+```bash
+npm run dev              # Start the Next.js development server
+npm run build            # Create a production build
+npm run start            # Start the production server
+npm run lint             # Run ESLint
+npm run prisma:generate  # Generate Prisma Client
+npm run db:push          # Push Prisma schema to the database
+```
+
+## Seed Data
+
+With the development server running, seed sample project data:
 
 ```bash
 curl http://localhost:3000/api/projects/seed
 ```
 
-To seed initial Admin credentials (`rhr3032@yahoo.com` / `rhr3032`), run:
+Seed the initial auth user:
 
 ```bash
 curl -X POST http://localhost:3000/api/auth/seed
 ```
 
----
+## Project Structure
 
-## Getting Started
+```text
+app/
+  api/                 Route handlers for projects, auth, dashboard, options, and notifications
+  board/               Kanban board page
+  login/               Login page
+  notifications/       Notifications page
+  profile/             Profile page
+  projects/            Project list, create, details, and edit pages
+  settings/            Settings page
+components/
+  dashboard/           Dashboard charts and summary widgets
+  ui/                  Reusable UI controls
+  app-shell.tsx        Application shell
+  badges.tsx           Status, type, priority, effort, and device badges
+  rich-text-editor.tsx TipTap editor
+  rich-text-viewer.tsx Rich text display
+lib/
+  api.ts               Project and dashboard data functions
+  auth.ts              Authentication helpers
+  notification-*.ts    Notification logic and client helpers
+  prisma.ts            Prisma client setup
+prisma/
+  schema.prisma        Database schema
+public/
+  preview.png          README preview image
+types/
+  index.ts             Shared TypeScript types
+```
 
-1. **Install Dependencies**:
-   ```bash
-   npm install
-   ```
+## Design Notes
 
-2. **Run Development Server**:
-   ```bash
-   npm run dev
-   ```
+- Dark glassmorphic UI with translucent cards, soft borders, and gradient action buttons.
+- Responsive layouts for dashboard, project list, project forms, details, and board views.
+- Badge-driven visual categorization for fast scanning.
+- Rich text editing supports structured project documentation directly inside project records.
+- Dashboard and board filters reuse Tech Stack and Tools Used lookup data for consistent reporting.
 
-3. **Open Browser**:
-   Navigate to http://localhost:3000.
-
-4. **Production Build**:
-   ```bash
-   npm run build
-   ```
-
----
-
-## API Routes
-
-- `GET /api/projects` - List all projects
-- `POST /api/projects` - Create a new project
-- `GET /api/projects/[id]` - Get single project details
-- `PATCH /api/projects/[id]` - Update project fields
-- `DELETE /api/projects/[id]` - Delete a project
-- `GET /api/dashboard` - Get aggregated dashboard statistics and projects light metadata
-- `GET /api/dashboard/velocity` - Fetch daily trend counts filtered by Month & Year
-- `GET /api/projects/seed` - Clear and seed 15 realistic projects
-- `POST /api/auth/seed` - Seed Admin account credentials
-
----
-
-## Development Notes
-
-- **Glassmorphic Styling** - Card elements use Tailwind custom classes to achieve modern semi-transparent blur backdrops.
-- **Client Address & Industry** - These fields are stored as database columns (`clientAddress` and `industry`) and are fully accessible via forms and detail panels.
-- **WYSIWYG Strategy Content** - Rich-text content generated by TipTap editors is safely stored as HTML strings in the database and rendered via `dangerouslySetInnerHTML` in the details panel.
