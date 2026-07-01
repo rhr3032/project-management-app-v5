@@ -1,4 +1,4 @@
-# Project Hub - Complete Implementation Summary
+# Projectory - Complete Implementation Summary
 
 ## What's Been Built
 

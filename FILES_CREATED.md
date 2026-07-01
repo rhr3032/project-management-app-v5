@@ -1,4 +1,4 @@
-# Complete File List - Project Hub
+# Complete File List - Projectory
 
 ## New Files Created
 

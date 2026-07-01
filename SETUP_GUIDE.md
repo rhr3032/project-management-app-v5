@@ -1,4 +1,4 @@
-# Project Hub - Setup & Installation Guide
+# Projectory - Setup & Installation Guide
 
 ## Quick Start (5 minutes)
 
@@ -98,7 +98,7 @@ CREATE INDEX idx_priority ON projects(priority);
 ## Project Structure
 
 ```
-📁 Project Hub
+📁 Projectory
 ├── 📁 app/
 │   ├── 📁 api/                 # API endpoints
 │   ├── 📁 board/              # Kanban board page

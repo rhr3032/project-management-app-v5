@@ -1,4 +1,4 @@
-# Project Hub - Beautiful Redesign Complete ✨
+# Projectory - Beautiful Redesign Complete ✨
 
 ## What's New
 

@@ -1,4 +1,4 @@
-# 🎉 Project Hub - START HERE
+# 🎉 Projectory - START HERE
 
 Welcome! Your project management web app is ready to use.
 
@@ -101,7 +101,7 @@ Read these in order based on what you want to do:
 ## 📂 File Organization
 
 ```
-📁 Project Hub
+📁 Projectory
 ├── 📄 START_HERE.md ← You are here
 ├── 📄 QUICK_START.md
 ├── 📄 README.md

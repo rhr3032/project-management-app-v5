@@ -61,7 +61,7 @@ export default function LoginPage() {
               <span className="text-white text-2xl font-bold">P</span>
             </div>
             <h1 className="text-3xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-white/60 text-sm">Sign in to Project Hub</p>
+            <p className="text-white/60 text-sm">Sign in to Projectory</p>
           </div>
 
           {/* Error Message */}
@@ -164,7 +164,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-white/30 text-xs mt-6">
-          Project Hub &copy; {new Date().getFullYear()}
+          Projectory &copy; {new Date().getFullYear()}
         </p>
       </div>
     </div>

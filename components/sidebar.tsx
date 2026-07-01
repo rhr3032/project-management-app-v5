@@ -30,8 +30,8 @@ export function Sidebar() {
             P
           </div>
           <div>
-            <h1 className="font-bold text-foreground">Project Hub</h1>
-            <p className="text-xs text-muted-foreground">Design &amp; Dev</p>
+            <h1 className="font-bold text-foreground">Projectory</h1>
+            <p className="text-xs text-muted-foreground">Design &amp; Dev.</p>
           </div>
         </div>
       </div>

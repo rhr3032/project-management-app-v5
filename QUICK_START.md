@@ -1,4 +1,4 @@
-# Project Hub - Quick Start Guide
+# Projectory - Quick Start Guide
 
 ## 🚀 Get Running in 30 Seconds
 

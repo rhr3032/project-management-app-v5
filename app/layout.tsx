@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Project Hub - Design & Dev Projects',
+  title: 'Projectory - Projects Management App',
   description: 'Manage your design and development projects with a modern, beautiful interface',
   generator: 'Next.js',
   icons: {
