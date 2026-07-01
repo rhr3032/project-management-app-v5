@@ -73,8 +73,20 @@ const NEW_CATEGORIES = [
   'Tablet Application', 'SaaS Mobile Application', 'E-commerce Mobile Application', 'Business Mobile Application'
 ];
 
+const UIUX_PRODUCT_CATEGORIES = [
+  'Web App UI Design', 'Admin Portal Design', 'Admin Panel Design', 'Dashboard UI Design',
+  'Analytics Dashboard Design', 'SaaS App UI Design', 'CRM Dashboard Design', 'Client Portal Design',
+  'Customer Portal UI Design', 'Web Portal UI Design', 'E-commerce App Design', 'Marketplace App Design',
+  'Responsive Web Design', 'Mobile-First Web Design', 'Product Redesign', 'UX Strategy'
+];
+
+const sortCategories = (categories: string[]) =>
+  categories
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .sort((a, b) => a.localeCompare(b));
+
 const CATEGORIES_BY_TYPE = {
-  'UI/UX Design': [
+  'UI/UX Design': sortCategories([
     'Logo', 'Branding', 'Illustration', 'Marketing Material', 'Video Production',
     'Photography', 'Content Creation', 'Social Media Campaign', 'Email Campaign', 'Print Design',
     'Packaging Design', '3D Modeling', 'Animation', 'Research Project', 'Wireframe',
@@ -83,10 +95,11 @@ const CATEGORIES_BY_TYPE = {
     'Motion Graphics', 'Infographic Design', 'Persona Creation', 'Journey Mapping', 'Site Mapping',
     'Information Architecture', 'Usability Testing', 'Interactive Prototype', 'Poster Design', 'Billboard Design',
     'Brochure Design', 'Card Design', 'Vector Art', 'Matte Painting', 'Storyboarding',
+    ...UIUX_PRODUCT_CATEGORIES,
     ...NEW_CATEGORIES
-  ].filter((value, index, self) => self.indexOf(value) === index), // Ensure uniqueness
+  ]),
 
-  'Web Development': [
+  'Web Development': sortCategories([
     'Website', 'Web App', 'E-commerce Platform', 'SaaS Product', 'Enterprise Software',
     'SEO', 'Data Visualization', 'Open Source Contribution', 'Dashboard', 'Full-Stack App',
     'API Integration', 'Landing Page', 'Web Portal', 'Headless CMS', 'Serverless App',
@@ -95,9 +108,9 @@ const CATEGORIES_BY_TYPE = {
     'Devops Setup', 'Docker Deployment', 'Cloud Migration', 'WebSockets Integration', 'Web Accessibility (a11y)',
     'Site Security Audit', 'Performance Optimization', 'Database Migration',
     ...NEW_CATEGORIES
-  ].filter((value, index, self) => self.indexOf(value) === index),
+  ]),
 
-  'Mobile App Development': [
+  'Mobile App Development': sortCategories([
     'Mobile App', 'AR/VR Experience', 'IoT Project', 'AI/ML Project', 'Game Development',
     'Flutter App', 'React Native App', 'Wearable App', 'Mobile Game', 'Bluetooth Integration',
     'Push Notification Service', 'Mobile Analytics', 'Native iOS Dev', 'Native Android Dev', 'App Store Optimization (ASO)',
@@ -105,7 +118,7 @@ const CATEGORIES_BY_TYPE = {
     'Apple Watch App', 'Android Wear App', 'Hybrid App', 'Cordova App', 'Capacitor App',
     'App Payment System', 'Firebase Integration', 'Mobile Security System',
     ...NEW_CATEGORIES
-  ].filter((value, index, self) => self.indexOf(value) === index)
+  ])
 } as const;
 
 const PROJECT_PRIORITIES = [
